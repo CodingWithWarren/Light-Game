@@ -136,6 +136,7 @@ public class Movement : MonoBehaviour
         if (rb.CircleCast(Vector2.right * velocity.normalized.x, 0.3f))
         {
             velocity.x = 0f;
+            horizontalInput = 0f;
         }
     }
 
@@ -143,8 +144,10 @@ public class Movement : MonoBehaviour
     {
         if (context.performed && grounded)
         {
-            grounded = false;
+            //Actual jump
             velocity.y = jumpForce;
+
+            grounded = false;
             jumping = true;
         }
     }
@@ -154,6 +157,7 @@ public class Movement : MonoBehaviour
         bool falling = velocity.y < 0 ? true : false;
         float multiplier = gravityMultipler;
 
+        //Making gravity faster when falling
         if (falling | !jumpButton.IsPressed())
         {
             multiplier = 1.3f;
