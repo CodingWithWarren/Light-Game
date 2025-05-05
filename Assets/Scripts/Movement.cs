@@ -1,11 +1,12 @@
+using System;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.InputSystem;
 
 [RequireComponent (typeof(Rigidbody2D))]
 public class Movement : MonoBehaviour
 {
-    [SerializeField]
-    private Vector2 velocity = Vector2.zero;
+    [SerializeField] Vector2 velocity = Vector2.zero;
     private Rigidbody2D rb;
 
     public float speed = 5f;
@@ -16,21 +17,27 @@ public class Movement : MonoBehaviour
 
     public float jumpForce = 7f;
     public float gravityMultipler = 1f;
-    public bool canJump = true;
-    public bool jumping = false;
+    [SerializeField] bool canJump = true;
+    [SerializeField] bool jumping = false;
 
-    public bool grounded = true;
+    [SerializeField] bool grounded = true;
 
     public Vector2 flareForce = new Vector2(5f, 5f);
     public float flareTorque = 50f;
 
     public GameObject flare;
 
-    public KeyCode jumpKey = KeyCode.Space;
+    public PlayerInput playerInput;
+    private InputActionAsset inputActionAsset;
+    private InputAction jumpButton;
+    private InputAction moveAction;
 
-    void Start()
+    void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        inputActionAsset = playerInput.actions;
+        jumpButton = inputActionAsset.FindActionMap("Player").FindAction("Jump");
+        moveAction = inputActionAsset.FindActionMap("Player").FindAction("Move");
     }
 
     void Update()
@@ -44,7 +51,13 @@ public class Movement : MonoBehaviour
 
         bool groundedHit = rb.CircleCast(Vector2.down, 0.3f);
 
-        HorizontalMovement();
+        if (!grounded && groundedHit)
+        {
+            speedMultiplier = 1f;
+            ChangeHorizontalMovement();
+        }
+
+        //HorizontalMovement();
 
         Gravity();
 
@@ -64,13 +77,15 @@ public class Movement : MonoBehaviour
         rb.MovePosition(rb.position + velocity * Time.fixedDeltaTime);
     }
 
-    private void HorizontalMovement()
+    public void HorizontalMovement(InputAction.CallbackContext context)
     {
+        print("function called");
+
         //Setting rotation based off of whether velocity is greather/less than zero
         transform.rotation = Quaternion.Euler(0, velocity.x < 0 ? 180 : 0, 0);
 
         //Setting velocity.x
-        velocity.x = ((speed * speedMultiplier) * Input.GetAxis("Horizontal")) + horizontalMomentum;
+        ChangeHorizontalMovement();
 
         //Decreasing horizontal momentum
         horizontalMomentum = horizontalMomentum > 1 ? (horizontalMomentum <= 5 ? horizontalMomentum / 1.05f : horizontalMomentum / 1.01f) : 0;
@@ -81,12 +96,28 @@ public class Movement : MonoBehaviour
         }
     }
 
+    private void ChangeHorizontalMovement()
+    {
+        velocity.x = (speed * speedMultiplier * moveAction.ReadValue<Vector2>().x) + horizontalMomentum;
+    }
+
+    public void Jump(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            velocity.y = jumpForce;
+            jumping = true;
+            speedMultiplier = jumpingSpeedMultiplier;
+            ChangeHorizontalMovement();
+        }
+    }
+
     private void Gravity()
     {
         bool falling = velocity.y < 0 ? true : false;
         float multiplier = gravityMultipler;
 
-        if (falling | !Input.GetKey(jumpKey))
+        if (falling | !jumpButton.IsPressed())
         {
             multiplier = 1.3f;
         }
@@ -98,15 +129,7 @@ public class Movement : MonoBehaviour
     private void GroundedMovement()
     {
         // Prevent gravity from infinitly building up
-        speedMultiplier = 1f;
         velocity.y = Mathf.Max(velocity.y, 0f);
         jumping = velocity.y > 0f;
-
-        // Perform jump
-        if (Input.GetKeyDown(jumpKey))
-        {
-            velocity.y = jumpForce;
-            jumping = true;
-        }
     }
 }
