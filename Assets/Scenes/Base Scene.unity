@@ -1069,10 +1069,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   velocity: {x: 0, y: 0}
   speed: 5
-  jumpingSpeedMultiplier: 0.7
   horizontalMomentum: 0
-  accelerationMultiplier: 1.5
+  horizontalInput: 0
+  accelerationTime: 1
+  halfAccelerationOnTurn: 1
   jumpForce: 12
+  jumpingSpeedMultiplier: 0.7
   gravityMultipler: 1
   canJump: 1
   jumping: 0
@@ -1174,7 +1176,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1778204156}
         m_TargetAssemblyTypeName: Movement, Assembly-CSharp
-        m_MethodName: HorizontalMovement
+        m_MethodName: OnMovementPress
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

@@ -9,19 +9,26 @@ public class Movement : MonoBehaviour
     [SerializeField] Vector2 velocity = Vector2.zero;
     private Rigidbody2D rb;
 
+    [Header("Horizontal Movement")]
     public float speed = 5f;
     private float speedMultiplier = 1f;
-    public float jumpingSpeedMultiplier;
     public float horizontalMomentum = 0f;
-    public float accelerationMultiplier = 1.5f;
+    private float movementPressTime = 0f;
+    [SerializeField] float horizontalInput = 0f;
 
+    [Header("Acceleration")]
+    public float accelerationTime = 0.1f;
+    public bool halfAccelerationOnTurn = true;
+
+    [Header("Jumping")]
     public float jumpForce = 7f;
+    public float jumpingSpeedMultiplier;
     public float gravityMultipler = 1f;
     [SerializeField] bool canJump = true;
     [SerializeField] bool jumping = false;
-
     [SerializeField] bool grounded = true;
 
+    [Header("")]
     public Vector2 flareForce = new Vector2(5f, 5f);
     public float flareTorque = 50f;
 
@@ -45,43 +52,81 @@ public class Movement : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.E))
         {
             Rigidbody2D flareRb = Instantiate(this.flare, transform.position + new Vector3(-0.5f, 0.25f, 0), Quaternion.identity).GetComponent<Rigidbody2D>();
-            //flareRb.AddForce(flareForce, ForceMode2D.Impulse);
-            //flareRb.AddTorque(flareTorque);
         }
 
+        //Checking whether or not player is grounded
         bool groundedHit = rb.CircleCast(Vector2.down, 0.3f);
-
         if (!grounded && groundedHit && !jumping)
         {
             speedMultiplier = 1f;
             grounded = true;
         }
 
-        //HorizontalMovement();
-
+        HorizontalMovement();
         Gravity();
 
-        print(groundedHit);
         if (groundedHit)
         {
-            speedMultiplier = 1f;
+            //Grounded movement when grounded
             GroundedMovement();
         } else
         {
+            //Lowering horizontal movement speed when in the air
             speedMultiplier = jumpingSpeedMultiplier;
         }
     }
 
     private void FixedUpdate()
     {
-        velocity.x = (speed * speedMultiplier * moveAction.ReadValue<Vector2>().x) + horizontalMomentum;
+        CalculateAcceleration();
+
+        //Setting velocity.x
+        velocity.x = (speed * speedMultiplier * horizontalInput) + horizontalMomentum;
+
+        //Actually moving the player
         rb.MovePosition(rb.position + velocity * Time.fixedDeltaTime);
     }
 
-    public void HorizontalMovement(InputAction.CallbackContext context)
+    private void CalculateAcceleration()
     {
-        print("function called");
+        float moveActionXInput = moveAction.ReadValue<Vector2>().x;
+        float accelerationMultiplier = 1;
+        print(moveActionXInput);
 
+        if (moveActionXInput != 0)
+        {
+            //Halving the acceleration on turn
+            if (((moveActionXInput < 0 && velocity.x > 0) || (moveActionXInput > 0 && velocity.x < 0)) && halfAccelerationOnTurn)
+            {
+                accelerationMultiplier = 0.5f;
+            } else
+            {
+                accelerationMultiplier = 1;
+            }
+
+            //Calculating acceleration and clamping it
+            horizontalInput += moveActionXInput * (Time.fixedDeltaTime / (accelerationTime * accelerationMultiplier));
+            horizontalInput = Mathf.Clamp(horizontalInput, -1, 1);
+        } else 
+        {
+            //Calculating Decceleration based on what direction the velocity is
+            if (velocity.x > 0)
+            {
+                horizontalInput -= (Time.fixedDeltaTime / (accelerationTime * accelerationMultiplier));
+                horizontalInput = Mathf.Clamp(horizontalInput, 0, 1);
+            }
+            else if (velocity.x < 0)
+            {
+                horizontalInput += (Time.fixedDeltaTime / (accelerationTime * accelerationMultiplier));
+                horizontalInput = Mathf.Clamp(horizontalInput, -1, 0);
+            }
+        }
+
+        //horizontalInput += moveActionXInput * (Time.fixedDeltaTime / accelerationTime);
+    }
+
+    public void HorizontalMovement()
+    {
         //Setting rotation based off of whether velocity is greather/less than zero
         transform.rotation = Quaternion.Euler(0, velocity.x < 0 ? 180 : 0, 0);
 
@@ -94,11 +139,6 @@ public class Movement : MonoBehaviour
         }
     }
 
-    private void ChangeHorizontalMovement()
-    {
-        velocity.x = (speed * speedMultiplier * moveAction.ReadValue<Vector2>().x) + horizontalMomentum;
-    }
-
     public void Jump(InputAction.CallbackContext context)
     {
         if (context.performed && grounded)
@@ -106,7 +146,6 @@ public class Movement : MonoBehaviour
             grounded = false;
             velocity.y = jumpForce;
             jumping = true;
-            speedMultiplier = jumpingSpeedMultiplier;
         }
     }
 
