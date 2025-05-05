@@ -4,7 +4,7 @@ public static class Extensions
 {
     private static LayerMask layerMask = LayerMask.GetMask("Default");
 
-    public static bool Raycast(this Rigidbody2D rigidbody, Vector2 direction, float distance = 0.375f, float radius = 0.25f)
+    public static bool CircleCast(this Rigidbody2D rigidbody, Vector2 direction, float distance = 0.375f, float radius = 0.25f)
     {
         if (rigidbody.isKinematic)
         {
