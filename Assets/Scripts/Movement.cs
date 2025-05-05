@@ -51,10 +51,10 @@ public class Movement : MonoBehaviour
 
         bool groundedHit = rb.CircleCast(Vector2.down, 0.3f);
 
-        if (!grounded && groundedHit)
+        if (!grounded && groundedHit && !jumping)
         {
             speedMultiplier = 1f;
-            ChangeHorizontalMovement();
+            grounded = true;
         }
 
         //HorizontalMovement();
@@ -74,6 +74,7 @@ public class Movement : MonoBehaviour
 
     private void FixedUpdate()
     {
+        velocity.x = (speed * speedMultiplier * moveAction.ReadValue<Vector2>().x) + horizontalMomentum;
         rb.MovePosition(rb.position + velocity * Time.fixedDeltaTime);
     }
 
@@ -83,9 +84,6 @@ public class Movement : MonoBehaviour
 
         //Setting rotation based off of whether velocity is greather/less than zero
         transform.rotation = Quaternion.Euler(0, velocity.x < 0 ? 180 : 0, 0);
-
-        //Setting velocity.x
-        ChangeHorizontalMovement();
 
         //Decreasing horizontal momentum
         horizontalMomentum = horizontalMomentum > 1 ? (horizontalMomentum <= 5 ? horizontalMomentum / 1.05f : horizontalMomentum / 1.01f) : 0;
@@ -103,12 +101,12 @@ public class Movement : MonoBehaviour
 
     public void Jump(InputAction.CallbackContext context)
     {
-        if (context.performed)
+        if (context.performed && grounded)
         {
+            grounded = false;
             velocity.y = jumpForce;
             jumping = true;
             speedMultiplier = jumpingSpeedMultiplier;
-            ChangeHorizontalMovement();
         }
     }
 
