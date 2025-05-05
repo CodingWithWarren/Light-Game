@@ -9,9 +9,13 @@ public class Movement : MonoBehaviour
     private Rigidbody2D rb;
 
     public float speed = 5f;
+    private float speedMultiplier = 1f;
+    public float jumpingSpeedMultiplier;
     public float horizontalMomentum = 0f;
+    public float accelerationMultiplier = 1.5f;
 
     public float jumpForce = 7f;
+    public float gravityMultipler = 1f;
     public bool canJump = true;
     public bool jumping = false;
 
@@ -47,7 +51,11 @@ public class Movement : MonoBehaviour
         print(groundedHit);
         if (groundedHit)
         {
+            speedMultiplier = 1f;
             GroundedMovement();
+        } else
+        {
+            speedMultiplier = jumpingSpeedMultiplier;
         }
     }
 
@@ -58,10 +66,16 @@ public class Movement : MonoBehaviour
 
     private void HorizontalMovement()
     {
-        velocity.x = (speed * Input.GetAxis("Horizontal")) + horizontalMomentum;
+        //Setting rotation based off of whether velocity is greather/less than zero
+        transform.rotation = Quaternion.Euler(0, velocity.x < 0 ? 180 : 0, 0);
+
+        //Setting velocity.x
+        velocity.x = ((speed * speedMultiplier) * Input.GetAxis("Horizontal")) + horizontalMomentum;
+
+        //Decreasing horizontal momentum
         horizontalMomentum = horizontalMomentum > 1 ? (horizontalMomentum <= 5 ? horizontalMomentum / 1.05f : horizontalMomentum / 1.01f) : 0;
 
-        if (rb.CircleCast(Vector2.right * velocity.x))
+        if (rb.CircleCast(Vector2.right * velocity.normalized.x, 0.3f))
         {
             velocity.x = 0f;
         }
@@ -70,7 +84,7 @@ public class Movement : MonoBehaviour
     private void Gravity()
     {
         bool falling = velocity.y < 0 ? true : false;
-        float multiplier = 0.8f;
+        float multiplier = gravityMultipler;
 
         if (falling | !Input.GetKey(jumpKey))
         {
@@ -78,12 +92,13 @@ public class Movement : MonoBehaviour
         }
 
         velocity.y += Physics2D.gravity.y * multiplier * Time.fixedDeltaTime;
-        velocity.y = Mathf.Max(velocity.y, -5);
+        velocity.y = Mathf.Max(velocity.y, -15);
     }
 
     private void GroundedMovement()
     {
         // Prevent gravity from infinitly building up
+        speedMultiplier = 1f;
         velocity.y = Mathf.Max(velocity.y, 0f);
         jumping = velocity.y > 0f;
 
