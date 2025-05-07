@@ -1137,8 +1137,8 @@ GameObject:
   - component: {fileID: 1778204154}
   - component: {fileID: 1778204157}
   - component: {fileID: 1778204156}
-  - component: {fileID: 1778204158}
   - component: {fileID: 1778204159}
+  - component: {fileID: 1778204160}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -1190,7 +1190,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -2413806693520163455, guid: ebe73ca9363db456bacf42c025bb4847, type: 3}
+  m_Sprite: {fileID: 21300000, guid: d12eb89e5b37de94eb96338d08a4a3bd, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -1210,7 +1210,7 @@ Transform:
   m_GameObject: {fileID: 1778204153}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3, y: -2, z: 0}
+  m_LocalPosition: {x: 3, y: -1.9999999, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1229,25 +1229,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b38f20be79c665c46b8c522fad6cf6be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  state: 0
   velocity: {x: 0, y: 0}
   speed: 5
-  horizontalMomentum: 0
-  disableHorizontalMovement: 0
+  speedMultiplier: 1
   horizontalInput: 0
+  horizontalMomentum: 0
+  horizontalMomentumDecreaseRate: 1.05
   accelerationTime: 0.15
   halfAccelerationOnTurn: 1
   jumpForce: 12
   jumpingSpeedMultiplier: 0.7
   gravityMultipler: 1
   gravityActivated: 1
-  canJump: 1
-  jumping: 0
-  grounded: 1
+  terminalVelocity: -15
   wallActions: 1
   wallJumpForce: 10
   wallKickVelocity: {x: 10, y: 5}
   touchingWall: 0
-  wallClinging: 0
   flareForce: {x: 5, y: 5}
   flareTorque: 50
   flare: {fileID: 3904417549022440846, guid: 95329abbbd575d34da4f76e01cb5b76e, type: 3}
@@ -1268,7 +1267,7 @@ Rigidbody2D:
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_GravityScale: 0
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 16082c5f885139a41b6b081315cac5d2, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -1279,43 +1278,6 @@ Rigidbody2D:
   m_SleepingMode: 0
   m_CollisionDetection: 1
   m_Constraints: 4
---- !u!70 &1778204158
-CapsuleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1778204153}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1, y: 1}
-  m_Direction: 0
 --- !u!114 &1778204159
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1450,6 +1412,43 @@ MonoBehaviour:
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!70 &1778204160
+CapsuleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1778204153}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0.025, y: 0}
+  m_Size: {x: 0.7, y: 1}
+  m_Direction: 0
 --- !u!1 &2129555336
 GameObject:
   m_ObjectHideFlags: 0

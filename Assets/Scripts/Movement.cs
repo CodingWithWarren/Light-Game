@@ -6,36 +6,43 @@ using UnityEngine.InputSystem;
 [RequireComponent (typeof(Rigidbody2D))]
 public class Movement : MonoBehaviour
 {
+    public enum PlayerStates
+    {
+        Grounded,
+        InAir,
+        WallClinging
+    }
+    [Header("General")]
+    [SerializeField] PlayerStates state = PlayerStates.Grounded;
     [SerializeField] Vector2 velocity = Vector2.zero;
+
     private Rigidbody2D rb;
 
     [Header("Horizontal Movement")]
     public float speed = 5f;
-    private float speedMultiplier = 1f;
-    public float horizontalMomentum = 0f;
-    private float movementPressTime = 0f;
-    [SerializeField] bool disableHorizontalMovement = false;
+    [SerializeField] float speedMultiplier = 1f;
     [SerializeField] float horizontalInput = 0f;
 
+    [Header("Horizontal Momentum")]
+    public float horizontalMomentum = 0f;
+    [SerializeField] float horizontalMomentumDecreaseRate = 1.05f;
+
     [Header("Acceleration")]
-    public float accelerationTime = 0.1f;
+    public float accelerationTime = 0.15f;
     public bool halfAccelerationOnTurn = true;
 
-    [Header("Jumping")]
+    [Header("Jumping & Gravity")]
     public float jumpForce = 12f;
-    public float jumpingSpeedMultiplier;
+    public float jumpingSpeedMultiplier = 0.7f;
     public float gravityMultipler = 1f;
     public bool gravityActivated = true;
-    [SerializeField] bool canJump = true;
-    [SerializeField] bool jumping = false;
-    [SerializeField] bool grounded = true;
+    public float terminalVelocity = -15f;
 
     [Header("Wall Actions")]
     public bool wallActions = true;
-    public float wallJumpForce = 8f;
-    public Vector2 wallKickVelocity = new Vector2(4, 5);
+    public float wallJumpForce = 10f;
+    public Vector2 wallKickVelocity = new Vector2(10, 5);
     [SerializeField] bool touchingWall = false;
-    [SerializeField] bool wallClinging = false;
 
     [Header("")]
     public Vector2 flareForce = new Vector2(5f, 5f);
@@ -47,7 +54,6 @@ public class Movement : MonoBehaviour
     private InputActionAsset inputActionAsset;
     private InputAction jumpButton;
     private InputAction moveAction;
-    private InputAction wallClingButton;
 
     void Awake()
     {
@@ -55,7 +61,6 @@ public class Movement : MonoBehaviour
         inputActionAsset = playerInput.actions;
         jumpButton = inputActionAsset.FindActionMap("Player").FindAction("Jump");
         moveAction = inputActionAsset.FindActionMap("Player").FindAction("Move");
-        wallClingButton = inputActionAsset.FindActionMap("Player").FindAction("Wall Cling");
     }
 
     void Update()
@@ -67,40 +72,46 @@ public class Movement : MonoBehaviour
 
         //Checking whether or not player is grounded
         bool groundedHit = rb.CircleCast(Vector2.down, 0.3f);
-        if (!grounded && groundedHit && !jumping)
-        {
-            speedMultiplier = 1f;
-            grounded = true;
-        }
 
         HorizontalMovement();
         Gravity();
 
+        //Calculating Player State
         if (groundedHit)
         {
-            //Grounded movement when grounded
-            GroundedMovement();
-        } else
+            state = PlayerStates.Grounded;
+
+            speedMultiplier = 1f;
+            //GroundedMovement();
+
+        }
+        else if (state == PlayerStates.WallClinging)
         {
-            //Lowering horizontal movement speed when in the air
+            //Stops gravity if wall clinging
+            velocity.y = 0;
+        }
+        else
+        {
+            state = PlayerStates.InAir;
+
             speedMultiplier = jumpingSpeedMultiplier;
-            grounded = false;
         }
     }
 
     private void FixedUpdate()
     {
         CalculateAcceleration();
+        CalculateMomentum();
 
-        //Setting velocity.x
-        if (!disableHorizontalMovement)
+        //Setting velocity.x if not wall clinging
+        if (state != PlayerStates.WallClinging)
         {
             velocity.x = (speed * speedMultiplier * horizontalInput) + horizontalMomentum;
         }
 
-        if (wallClinging)
+        if (state == PlayerStates.WallClinging)
         {
-            OnWallCling();
+            //OnWallCling();
         }
 
         //Actually moving the player
@@ -120,24 +131,13 @@ public class Movement : MonoBehaviour
             transform.rotation = Quaternion.Euler(0, 0, 0);
         }
 
-        //Decreasing horizontal momentum
-        //horizontalMomentum = Mathf.Abs(horizontalMomentum) > 1 ? (Mathf.Abs(horizontalMomentum) <= 5 ? horizontalMomentum / 1.05f : horizontalMomentum / 1.01f) : 0;
-        if (Mathf.Abs(horizontalMomentum) > 1)
-        {
-            horizontalMomentum = Math.Abs(horizontalMomentum) >= 5 ? horizontalMomentum / 1.01f : horizontalMomentum / 1.05f;
-            print("lowering horizontal momentum");
-        } else
-        {
-            horizontalMomentum = 0;
-        }
-
-        if (rb.CircleCast(Vector2.right, 0.3f))
+        //Checking if touching a wall
+        if (rb.CircleCast(Vector2.right, 0.14f))
         {
             velocity.x = 0f;
             horizontalInput = 0f;
-            //horizontalMomentum = horizontalMomentum > 0 ? 0 : horizontalMomentum;
             touchingWall = true;
-        } else if (rb.CircleCast(Vector2.left, 0.3f))
+        } else if (rb.CircleCast(Vector2.left, 0.14f))
         {
             velocity.x = 0f;
             horizontalInput = 0f;
@@ -154,7 +154,6 @@ public class Movement : MonoBehaviour
     {
         float moveActionXInput = moveAction.ReadValue<Vector2>().x;
         float accelerationMultiplier = 1;
-        print(moveActionXInput);
 
         if (moveActionXInput != 0)
         {
@@ -184,8 +183,39 @@ public class Movement : MonoBehaviour
                 horizontalInput = Mathf.Clamp(horizontalInput, -1, 0);
             }
         }
+    }
 
-        //horizontalInput += moveActionXInput * (Time.fixedDeltaTime / accelerationTime);
+    private void CalculateMomentum()
+    {
+        float momentumDivider = horizontalMomentumDecreaseRate;
+
+        //Decreases momentum faster if touching the ground
+        if (state == PlayerStates.Grounded && Mathf.Abs(horizontalMomentum) > 0)
+        {
+            momentumDivider += 0.1f;
+        }
+
+        //Checking for collisions with walls
+        if (rb.CircleCast(Vector2.right, 0.3f) && horizontalMomentum > 0)
+        {
+            print(horizontalMomentum);
+            horizontalMomentum = 0;
+        }
+        else if (rb.CircleCast(Vector2.left, 0.3f) && horizontalMomentum < 0)
+        {
+            horizontalMomentum = 0;
+            print(horizontalMomentum);
+        }
+
+        //Calculating the momentum decrease
+        if (Mathf.Abs(horizontalMomentum) > 1)
+        {
+            horizontalMomentum /= momentumDivider;
+        }
+        else
+        {
+            horizontalMomentum = 0;
+        }
     }
     #endregion
 
@@ -194,26 +224,13 @@ public class Movement : MonoBehaviour
     {
         if (context.performed) 
         {
-            if (grounded)
+            if (state == PlayerStates.Grounded)
             {
                 //Jumping
                 velocity.y = jumpForce;
-
-                grounded = false;
-                jumping = true;
             }
-            else if (wallClinging)
+            else if (state == PlayerStates.WallClinging)
             {
-                //if (moveAction.ReadValue<Vector2>().y == 1)
-                //{
-                //    //Wall Jumping
-                //    velocity.y = wallJumpForce;
-                //} else
-                //{
-                //    horizontalMomentum = transform.rotation.eulerAngles.y == 0 ? -wallKickVelocity.x : wallKickVelocity.x;
-                //    print("setting horizontal momentum to" + horizontalMomentum);
-                //    velocity.y = wallKickVelocity.y;
-                //}
                 float playerHorizontalInput = moveAction.ReadValue<Vector2>().x;
 
                 if (playerHorizontalInput == -1 && transform.rotation.eulerAngles.y == 0)
@@ -228,28 +245,22 @@ public class Movement : MonoBehaviour
                     velocity.y = wallKickVelocity.y;
                 } else
                 {
+                    //Wall Jumping
                     velocity.y = wallJumpForce;
                 }
 
-                wallClinging = false;
+                state = PlayerStates.InAir;
                 touchingWall = false;
                 gravityActivated = true;
-                disableHorizontalMovement = false;
             }
         }
     }
 
-    private void OnWallCling()
-    {
-        velocity.y = 0;
-        disableHorizontalMovement = true;
-    }
-
     public void WallClingInput(InputAction.CallbackContext context)
     {
-        if ((rb.CircleCast(Vector2.right, 0.26f) || rb.CircleCast(Vector2.left, 0.3f)) && context.performed && !grounded)
+        if ((rb.CircleCast(Vector2.right, 0.26f) || rb.CircleCast(Vector2.left, 0.3f)) && context.performed && state == PlayerStates.InAir)
         {
-            wallClinging = true;
+            state = PlayerStates.WallClinging;
         }
     }
 
@@ -264,23 +275,38 @@ public class Movement : MonoBehaviour
             multiplier = 1.3f;
         }
 
-        velocity.y += Physics2D.gravity.y * multiplier * Time.fixedDeltaTime;
-        velocity.y = Mathf.Max(velocity.y, -15);
+
+        if (state == PlayerStates.InAir)
+        {
+            //Setting gravity
+            velocity.y += Physics2D.gravity.y * multiplier * Time.fixedDeltaTime;
+            velocity.y = Mathf.Max(velocity.y, terminalVelocity);
+        } else
+        {
+            velocity.y = Mathf.Max(velocity.y, 0f);
+        }
     }
     #endregion
 
-    private void GroundedMovement()
-    {
-        // Prevent gravity from infinitly building up
-        velocity.y = Mathf.Max(velocity.y, 0f);
-        jumping = velocity.y > 0f;
-    }
+    //private void GroundedMovement()
+    //{
+    //    // Prevent gravity from infinitly building up
+    //    //velocity.y = Mathf.Max(velocity.y, 0f);
+    //}
 
     private void OnCollisionStay2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Wall"))
         {
             touchingWall = true;
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (rb.CircleCast(Vector2.up, 0.3f))
+        {
+            velocity.y = 0;
         }
     }
 }
