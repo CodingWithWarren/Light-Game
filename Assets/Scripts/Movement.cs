@@ -21,7 +21,7 @@ public class Movement : MonoBehaviour
     [Header("Horizontal Movement")]
     public float speed = 5f;
     [SerializeField] float speedMultiplier = 1f;
-    [SerializeField] float horizontalInput = 0f;
+    [SerializeField] float acceleration = 0f;
 
     [Header("Horizontal Momentum")]
     public float horizontalMomentum = 0f;
@@ -35,7 +35,6 @@ public class Movement : MonoBehaviour
     public float jumpForce = 12f;
     public float jumpingSpeedMultiplier = 0.7f;
     public float gravityMultipler = 1f;
-    public bool gravityActivated = true;
     public float terminalVelocity = -15f;
 
     [Header("Wall Actions")]
@@ -73,7 +72,8 @@ public class Movement : MonoBehaviour
         //Checking whether or not player is grounded
         bool groundedHit = rb.CircleCast(Vector2.down, 0.3f);
 
-        HorizontalMovement();
+        SetRotation();
+        CheckForWallTouch();
         Gravity();
 
         //Calculating Player State
@@ -82,7 +82,6 @@ public class Movement : MonoBehaviour
             state = PlayerStates.Grounded;
 
             speedMultiplier = 1f;
-            //GroundedMovement();
 
         }
         else if (state == PlayerStates.WallClinging)
@@ -106,12 +105,7 @@ public class Movement : MonoBehaviour
         //Setting velocity.x if not wall clinging
         if (state != PlayerStates.WallClinging)
         {
-            velocity.x = (speed * speedMultiplier * horizontalInput) + horizontalMomentum;
-        }
-
-        if (state == PlayerStates.WallClinging)
-        {
-            //OnWallCling();
+            velocity.x = (speed * speedMultiplier * acceleration) + horizontalMomentum;
         }
 
         //Actually moving the player
@@ -120,7 +114,7 @@ public class Movement : MonoBehaviour
 
     #region Horizontal Movement
 
-    public void HorizontalMovement()
+    public void SetRotation()
     {
         //Setting rotation based off of whether velocity is greather/less than zero
         if (velocity.x < 0)
@@ -130,17 +124,20 @@ public class Movement : MonoBehaviour
         {
             transform.rotation = Quaternion.Euler(0, 0, 0);
         }
+    }
 
-        //Checking if touching a wall
+    private void CheckForWallTouch()
+    {
         if (rb.CircleCast(Vector2.right, 0.14f))
         {
             velocity.x = 0f;
-            horizontalInput = 0f;
+            acceleration = 0f;
             touchingWall = true;
-        } else if (rb.CircleCast(Vector2.left, 0.14f))
+        }
+        else if (rb.CircleCast(Vector2.left, 0.14f))
         {
             velocity.x = 0f;
-            horizontalInput = 0f;
+            acceleration = 0f;
             horizontalMomentum = horizontalMomentum < 0 ? 0 : horizontalMomentum;
             touchingWall = true;
         }
@@ -167,20 +164,20 @@ public class Movement : MonoBehaviour
             }
 
             //Calculating acceleration and clamping it
-            horizontalInput += moveActionXInput * (Time.fixedDeltaTime / (accelerationTime * accelerationMultiplier));
-            horizontalInput = Mathf.Clamp(horizontalInput, -1, 1);
+            acceleration += moveActionXInput * (Time.fixedDeltaTime / (accelerationTime * accelerationMultiplier));
+            acceleration = Mathf.Clamp(acceleration, -1, 1);
         } else 
         {
-            //Calculating Decceleration based on what direction the velocity is
+            //Calculating decceleration based on what direction the velocity is
             if (velocity.x > 0)
             {
-                horizontalInput -= (Time.fixedDeltaTime / (accelerationTime * accelerationMultiplier));
-                horizontalInput = Mathf.Clamp(horizontalInput, 0, 1);
+                acceleration -= (Time.fixedDeltaTime / (accelerationTime * accelerationMultiplier));
+                acceleration = Mathf.Clamp(acceleration, 0, 1);
             }
             else if (velocity.x < 0)
             {
-                horizontalInput += (Time.fixedDeltaTime / (accelerationTime * accelerationMultiplier));
-                horizontalInput = Mathf.Clamp(horizontalInput, -1, 0);
+                acceleration += (Time.fixedDeltaTime / (accelerationTime * accelerationMultiplier));
+                acceleration = Mathf.Clamp(acceleration, -1, 0);
             }
         }
     }
@@ -196,15 +193,13 @@ public class Movement : MonoBehaviour
         }
 
         //Checking for collisions with walls
-        if (rb.CircleCast(Vector2.right, 0.3f) && horizontalMomentum > 0)
+        if (rb.CircleCast(Vector2.right, 0.14f) && horizontalMomentum > 0)
         {
-            print(horizontalMomentum);
             horizontalMomentum = 0;
         }
-        else if (rb.CircleCast(Vector2.left, 0.3f) && horizontalMomentum < 0)
+        else if (rb.CircleCast(Vector2.left, 0.14f) && horizontalMomentum < 0)
         {
             horizontalMomentum = 0;
-            print(horizontalMomentum);
         }
 
         //Calculating the momentum decrease
@@ -251,7 +246,6 @@ public class Movement : MonoBehaviour
 
                 state = PlayerStates.InAir;
                 touchingWall = false;
-                gravityActivated = true;
             }
         }
     }
@@ -270,7 +264,7 @@ public class Movement : MonoBehaviour
         float multiplier = gravityMultipler;
 
         //Making gravity faster when falling
-        if (falling | !jumpButton.IsPressed())
+        if (falling || !jumpButton.IsPressed())
         {
             multiplier = 1.3f;
         }
@@ -287,12 +281,6 @@ public class Movement : MonoBehaviour
         }
     }
     #endregion
-
-    //private void GroundedMovement()
-    //{
-    //    // Prevent gravity from infinitly building up
-    //    //velocity.y = Mathf.Max(velocity.y, 0f);
-    //}
 
     private void OnCollisionStay2D(Collision2D collision)
     {

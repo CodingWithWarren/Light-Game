@@ -1231,17 +1231,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   state: 0
   velocity: {x: 0, y: 0}
-  speed: 5
+  speed: 6
   speedMultiplier: 1
-  horizontalInput: 0
+  acceleration: 0
   horizontalMomentum: 0
   horizontalMomentumDecreaseRate: 1.05
   accelerationTime: 0.15
   halfAccelerationOnTurn: 1
   jumpForce: 12
-  jumpingSpeedMultiplier: 0.7
+  jumpingSpeedMultiplier: 0.8
   gravityMultipler: 1
-  gravityActivated: 1
   terminalVelocity: -15
   wallActions: 1
   wallJumpForce: 10
