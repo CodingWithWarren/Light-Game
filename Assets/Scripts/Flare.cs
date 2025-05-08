@@ -12,16 +12,14 @@ public class Flare : MonoBehaviour
 
     private float bounces = 0;
 
-    private bool stopArtificialGravity = false;
-
     private Rigidbody2D rb;
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         velocity = startVelocity;
 
-        bounceYForce = startVelocity.y / 1.5f;
-        bounceXForce = startVelocity.x / 1.5f;
+        bounceXForce = startVelocity.x / 2;
+        bounceYForce = startVelocity.y / 2;
     }
     private void FixedUpdate()
     {
@@ -39,8 +37,6 @@ public class Flare : MonoBehaviour
                 velocity.y = bounceYForce;
                 velocity.x = velocity.x < 0 ? -bounceXForce : bounceXForce;
 
-                bounceYForce /= 1.5f;
-                bounceXForce /= 1.5f;
                 bounces++;
             }
         }
