@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 
 [RequireComponent (typeof(Rigidbody2D))]
 public class Movement : MonoBehaviour
@@ -18,27 +19,28 @@ public class Movement : MonoBehaviour
 
     private Rigidbody2D rb;
 
-    [Header("Horizontal Movement")]
+    [Header ("Speed")]
     public float speed = 5f;
-    [SerializeField] float speedMultiplier = 1f;
-    [SerializeField] float acceleration = 0f;
+    public float speedChangeRate = 0.1f;
+    [SerializeField] float currentSpeedMultiplier = 1f;
+    public float groundedSpeedMultiplier = 1f;
+    public float jumpingSpeedMultiplier = 0.7f;
 
-    [Header("Horizontal Momentum")]
-    public float horizontalMomentum = 0f;
-    [SerializeField] float horizontalMomentumDecreaseRate = 1.05f;
+    [Header("Horizontal Force")]
+    public float horizontalForce = 0f;
+    [SerializeField] float horizontalForceDecreaseRate = 1.05f;
 
     [Header("Acceleration")]
+    [SerializeField] float acceleration = 0f;
     public float accelerationTime = 0.15f;
     public bool halfAccelerationOnTurn = true;
 
     [Header("Jumping & Gravity")]
     public float jumpForce = 12f;
-    public float jumpingSpeedMultiplier = 0.7f;
     public float gravityMultipler = 1f;
     public float terminalVelocity = -15f;
 
     [Header("Wall Actions")]
-    public bool wallActions = true;
     public float wallJumpForce = 10f;
     public Vector2 wallKickVelocity = new Vector2(10, 5);
     [SerializeField] bool touchingWall = false;
@@ -81,7 +83,7 @@ public class Movement : MonoBehaviour
         {
             state = PlayerStates.Grounded;
 
-            speedMultiplier = 1f;
+            LerpSpeedMultiplier(groundedSpeedMultiplier, speedChangeRate);
 
         }
         else if (state == PlayerStates.WallClinging)
@@ -93,19 +95,19 @@ public class Movement : MonoBehaviour
         {
             state = PlayerStates.InAir;
 
-            speedMultiplier = jumpingSpeedMultiplier;
+            LerpSpeedMultiplier(jumpingSpeedMultiplier, speedChangeRate);
         }
     }
 
     private void FixedUpdate()
     {
         CalculateAcceleration();
-        CalculateMomentum();
+        CalculateForce();
 
         //Setting velocity.x if not wall clinging
         if (state != PlayerStates.WallClinging)
         {
-            velocity.x = (speed * speedMultiplier * acceleration) + horizontalMomentum;
+            velocity.x = (speed * currentSpeedMultiplier * acceleration) + horizontalForce;
         }
 
         //Actually moving the player
@@ -114,10 +116,25 @@ public class Movement : MonoBehaviour
 
     #region Horizontal Movement
 
+    private void LerpSpeedMultiplier(float target, float rate)
+    {
+        if (currentSpeedMultiplier != target)
+        {
+            //Linearly interpolating the speed multiplier
+            currentSpeedMultiplier += (currentSpeedMultiplier - target < 0 ? rate : -rate) * Time.fixedDeltaTime;
+
+            //Setting the speed multiplier to the target if the difference between the two is less than the chosen rate
+            if (Math.Abs(currentSpeedMultiplier - target) < Math.Abs(rate * Time.fixedDeltaTime))
+            {
+                currentSpeedMultiplier = target;
+            }
+        }
+    }
+
     public void SetRotation()
     {
-        //Setting rotation based off of whether velocity is greather/less than zero
-        if (velocity.x < 0)
+        //Setting rotation based off of whether horizontal input is greather/less than zero
+        if (velocity.x < 0 && transform.rotation == Quaternion.Euler(0, 0, 0))
         {
             transform.rotation = Quaternion.Euler(0, 180, 0);
         } else if (velocity.x > 0)
@@ -138,7 +155,7 @@ public class Movement : MonoBehaviour
         {
             velocity.x = 0f;
             acceleration = 0f;
-            horizontalMomentum = horizontalMomentum < 0 ? 0 : horizontalMomentum;
+            horizontalForce = horizontalForce < 0 ? 0 : horizontalForce;
             touchingWall = true;
         }
         else
@@ -182,34 +199,34 @@ public class Movement : MonoBehaviour
         }
     }
 
-    private void CalculateMomentum()
+    private void CalculateForce()
     {
-        float momentumDivider = horizontalMomentumDecreaseRate;
+        float forceDivider = horizontalForceDecreaseRate;
 
-        //Decreases momentum faster if touching the ground
-        if (state == PlayerStates.Grounded && Mathf.Abs(horizontalMomentum) > 0)
+        //Decreases force faster if touching the ground
+        if (state == PlayerStates.Grounded && Mathf.Abs(horizontalForce) > 0)
         {
-            momentumDivider += 0.1f;
+            forceDivider += 0.1f;
         }
 
         //Checking for collisions with walls
-        if (rb.CircleCast(Vector2.right, 0.14f) && horizontalMomentum > 0)
+        if (rb.CircleCast(Vector2.right, 0.14f) && horizontalForce > 0)
         {
-            horizontalMomentum = 0;
+            horizontalForce = 0;
         }
-        else if (rb.CircleCast(Vector2.left, 0.14f) && horizontalMomentum < 0)
+        else if (rb.CircleCast(Vector2.left, 0.14f) && horizontalForce < 0)
         {
-            horizontalMomentum = 0;
+            horizontalForce = 0;
         }
 
-        //Calculating the momentum decrease
-        if (Mathf.Abs(horizontalMomentum) > 1)
+        //Calculating the force decrease
+        if (Mathf.Abs(horizontalForce) > 1)
         {
-            horizontalMomentum /= momentumDivider;
+            horizontalForce /= forceDivider;
         }
         else
         {
-            horizontalMomentum = 0;
+            horizontalForce = 0;
         }
     }
     #endregion
@@ -219,7 +236,7 @@ public class Movement : MonoBehaviour
     {
         if (context.performed) 
         {
-            if (state == PlayerStates.Grounded)
+            if (state == PlayerStates.Grounded || rb.CircleCast(Vector2.down, 0.5f))
             {
                 //Jumping
                 velocity.y = jumpForce;
@@ -231,12 +248,12 @@ public class Movement : MonoBehaviour
                 if (playerHorizontalInput == -1 && transform.rotation.eulerAngles.y == 0)
                 {
                     //Wall kicking to the left
-                    horizontalMomentum = -wallKickVelocity.x;
+                    horizontalForce = -wallKickVelocity.x;
                     velocity.y = wallKickVelocity.y;
                 } else if (playerHorizontalInput == 1 && Math.Abs(transform.rotation.eulerAngles.y) == 180)
                 {
                     //Wall kicking to the right
-                    horizontalMomentum = wallKickVelocity.x;
+                    horizontalForce = wallKickVelocity.x;
                     velocity.y = wallKickVelocity.y;
                 } else
                 {
