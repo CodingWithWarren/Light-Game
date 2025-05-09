@@ -45,6 +45,11 @@ public class Movement : MonoBehaviour
     public Vector2 wallKickVelocity = new Vector2(10, 5);
     [SerializeField] bool touchingWall = false;
 
+    [Header("Circle Cast")]
+    public float groundCastDistance = 0.3f;
+    public float rightCastDistance = 0.15f;
+    public float leftCastDistance = 0.12f;
+
     [Header("")]
     public Vector2 flareForce = new Vector2(5f, 5f);
     public float flareTorque = 50f;
@@ -72,7 +77,7 @@ public class Movement : MonoBehaviour
         }
 
         //Checking whether or not player is grounded
-        bool groundedHit = rb.CircleCast(Vector2.down, 0.3f);
+        bool groundedHit = rb.CircleCast(Vector2.down, groundCastDistance);
 
         SetRotation();
         CheckForWallTouch();
@@ -88,8 +93,8 @@ public class Movement : MonoBehaviour
         }
         else if (state == PlayerStates.WallClinging)
         {
-            //Stops gravity if wall clinging
-            velocity.y = 0;
+            //Stops velocity if wall clinging
+            velocity = Vector2.zero;
         }
         else
         {
@@ -210,11 +215,11 @@ public class Movement : MonoBehaviour
         }
 
         //Checking for collisions with walls
-        if (rb.CircleCast(Vector2.right, 0.14f) && horizontalForce > 0)
+        if (rb.CircleCast(Vector2.right, rightCastDistance) && horizontalForce > 0)
         {
             horizontalForce = 0;
         }
-        else if (rb.CircleCast(Vector2.left, 0.14f) && horizontalForce < 0)
+        else if (rb.CircleCast(Vector2.left, leftCastDistance) && horizontalForce < 0)
         {
             horizontalForce = 0;
         }
@@ -269,9 +274,23 @@ public class Movement : MonoBehaviour
 
     public void WallClingInput(InputAction.CallbackContext context)
     {
-        if ((rb.CircleCast(Vector2.right, 0.26f) || rb.CircleCast(Vector2.left, 0.3f)) && context.performed && state == PlayerStates.InAir)
+        //if ((rb.CircleCast(Vector2.right, rightCastDistance) || rb.CircleCast(Vector2.left, leftCastDistance)) && context.performed && state == PlayerStates.InAir)
+        //{
+        //    state = PlayerStates.WallClinging;
+        //}
+
+        if (context.performed && state == PlayerStates.InAir)
         {
-            state = PlayerStates.WallClinging;
+            if (rb.CircleCast(Vector2.right, rightCastDistance))
+            {
+                state = PlayerStates.WallClinging;
+                transform.rotation = Quaternion.Euler(0, 0, 0);
+            }
+            else if (rb.CircleCast(Vector2.left, leftCastDistance))
+            {
+                state = PlayerStates.WallClinging;
+                transform.rotation = Quaternion.Euler(0, 180, 0);
+            }
         }
     }
 
