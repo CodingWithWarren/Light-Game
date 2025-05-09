@@ -144,10 +144,10 @@ MonoBehaviour:
   accelerationTime: 0.15
   halfAccelerationOnTurn: 1
   jumpForce: 12
-  gravityMultipler: 1
+  gravityMultipler: 3
   terminalVelocity: -15
   wallJumpForce: 10
-  wallKickVelocity: {x: 10, y: 5}
+  wallKickVelocity: {x: 6, y: 5}
   touchingWall: 0
   groundCastDistance: 0.3
   rightCastDistance: 0.15

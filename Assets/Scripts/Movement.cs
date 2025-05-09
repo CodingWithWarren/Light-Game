@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 [RequireComponent (typeof(Rigidbody2D))]
@@ -67,6 +68,8 @@ public class Movement : MonoBehaviour
         inputActionAsset = playerInput.actions;
         jumpButton = inputActionAsset.FindActionMap("Player").FindAction("Jump");
         moveAction = inputActionAsset.FindActionMap("Player").FindAction("Move");
+
+        Application.targetFrameRate = 30;
     }
 
     void Update()
@@ -81,7 +84,6 @@ public class Movement : MonoBehaviour
 
         SetRotation();
         CheckForWallTouch();
-        Gravity();
 
         //Calculating Player State
         if (groundedHit)
@@ -106,6 +108,7 @@ public class Movement : MonoBehaviour
 
     private void FixedUpdate()
     {
+        Gravity();
         CalculateAcceleration();
         CalculateForce();
 
@@ -241,7 +244,7 @@ public class Movement : MonoBehaviour
     {
         if (context.performed) 
         {
-            if (state == PlayerStates.Grounded || rb.CircleCast(Vector2.down, 0.5f))
+            if (state == PlayerStates.Grounded || rb.CircleCast(Vector2.down, groundCastDistance))
             {
                 //Jumping
                 velocity.y = jumpForce;
@@ -302,7 +305,7 @@ public class Movement : MonoBehaviour
         //Making gravity faster when falling
         if (falling || !jumpButton.IsPressed())
         {
-            multiplier = 1.3f;
+            multiplier += 1.3f;
         }
 
 
