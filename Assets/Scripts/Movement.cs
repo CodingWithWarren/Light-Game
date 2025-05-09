@@ -275,11 +275,6 @@ public class Movement : MonoBehaviour
 
     public void WallClingInput(InputAction.CallbackContext context)
     {
-        //if ((rb.CircleCast(Vector2.right, rightCastDistance) || rb.CircleCast(Vector2.left, leftCastDistance)) && context.performed && state == PlayerStates.InAir)
-        //{
-        //    state = PlayerStates.WallClinging;
-        //}
-
         if (context.performed && state == PlayerStates.InAir)
         {
             if (rb.CircleCast(Vector2.right, rightCastDistance))
