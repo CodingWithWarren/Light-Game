@@ -68,8 +68,6 @@ public class Movement : MonoBehaviour
         inputActionAsset = playerInput.actions;
         jumpButton = inputActionAsset.FindActionMap("Player").FindAction("Jump");
         moveAction = inputActionAsset.FindActionMap("Player").FindAction("Move");
-
-        Application.targetFrameRate = 30;
     }
 
     void Update()
