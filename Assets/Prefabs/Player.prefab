@@ -149,6 +149,9 @@ MonoBehaviour:
   wallJumpForce: 10
   wallKickVelocity: {x: 10, y: 5}
   touchingWall: 0
+  groundCastDistance: 0.3
+  rightCastDistance: 0.15
+  leftCastDistance: 0.15
   flareForce: {x: 5, y: 5}
   flareTorque: 50
   flare: {fileID: 3904417549022440846, guid: 95329abbbd575d34da4f76e01cb5b76e, type: 3}
