@@ -10,9 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 4389470208927109042}
   - component: {fileID: 5123203111589033894}
-  - component: {fileID: 7119580479089408077}
   - component: {fileID: 5539208867491738088}
   - component: {fileID: 4708431289049669241}
+  - component: {fileID: 4408208950267491505}
   m_Layer: 3
   m_Name: Flare
   m_TagString: Untagged
@@ -64,23 +64,6 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!114 &7119580479089408077
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3904417549022440846}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1ff78144a8d92b94891aae84a754005b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  velocity: {x: 0, y: 0}
-  startVelocity: {x: 3, y: 4}
-  bounceYForce: 0
-  bounceXForce: 0
-  maxBounces: 2
 --- !u!70 &5539208867491738088
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -125,7 +108,7 @@ CapsuleCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3904417549022440846}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Density: 1
   m_Material: {fileID: 0}
@@ -155,6 +138,23 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 0.25, y: 0.5}
   m_Direction: 0
+--- !u!114 &4408208950267491505
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3904417549022440846}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ff78144a8d92b94891aae84a754005b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  velocity: {x: 0, y: 0}
+  startVelocity: {x: 6, y: 6}
+  bounceYForce: 0
+  bounceXForce: 0
+  maxBounces: 3
 --- !u!1 &5934813058149162160
 GameObject:
   m_ObjectHideFlags: 0
