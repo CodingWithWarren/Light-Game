@@ -19,6 +19,7 @@ public class Movement : MonoBehaviour
     [SerializeField] Vector2 velocity = Vector2.zero;
 
     private Rigidbody2D rb;
+    private Animator animator;
 
     [Header ("Speed")]
     public float speed = 5f;
@@ -65,6 +66,7 @@ public class Movement : MonoBehaviour
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
         inputActionAsset = playerInput.actions;
         jumpButton = inputActionAsset.FindActionMap("Player").FindAction("Jump");
         moveAction = inputActionAsset.FindActionMap("Player").FindAction("Move");
@@ -90,6 +92,15 @@ public class Movement : MonoBehaviour
 
             LerpSpeedMultiplier(groundedSpeedMultiplier, speedChangeRate);
 
+            if (velocity.x != 0)
+            {
+                animator.SetBool("Moving", true);
+                print("moving");
+            } else
+            {
+                animator.SetBool("Moving", false);
+            }
+
         }
         else if (state == PlayerStates.WallClinging)
         {
@@ -102,6 +113,8 @@ public class Movement : MonoBehaviour
 
             LerpSpeedMultiplier(jumpingSpeedMultiplier, speedChangeRate);
         }
+
+        animator.SetBool("Grounded", groundedHit);
     }
 
     private void FixedUpdate()
@@ -246,6 +259,7 @@ public class Movement : MonoBehaviour
             {
                 //Jumping
                 velocity.y = jumpForce;
+                animator.SetTrigger("Jump");
             }
             else if (state == PlayerStates.WallClinging)
             {
@@ -265,6 +279,7 @@ public class Movement : MonoBehaviour
                 {
                     //Wall Jumping
                     velocity.y = wallJumpForce;
+                    animator.SetTrigger("Jump");
                 }
 
                 state = PlayerStates.InAir;
@@ -311,6 +326,8 @@ public class Movement : MonoBehaviour
         {
             velocity.y = Mathf.Max(velocity.y, 0f);
         }
+
+        animator.SetBool("Falling", falling);
     }
     #endregion
 
