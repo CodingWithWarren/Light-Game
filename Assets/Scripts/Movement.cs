@@ -19,6 +19,7 @@ public class Movement : MonoBehaviour
     [SerializeField] Vector2 velocity = Vector2.zero;
 
     private Rigidbody2D rb;
+    private Animator animator;
 
     [Header ("Speed")]
     public float speed = 5f;
@@ -65,6 +66,7 @@ public class Movement : MonoBehaviour
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
         inputActionAsset = playerInput.actions;
         jumpButton = inputActionAsset.FindActionMap("Player").FindAction("Jump");
         moveAction = inputActionAsset.FindActionMap("Player").FindAction("Move");
@@ -89,7 +91,7 @@ public class Movement : MonoBehaviour
             state = PlayerStates.Grounded;
 
             LerpSpeedMultiplier(groundedSpeedMultiplier, speedChangeRate);
-
+            animator.SetBool("Moving", velocity.x != 0);
         }
         else if (state == PlayerStates.WallClinging)
         {
@@ -102,6 +104,9 @@ public class Movement : MonoBehaviour
 
             LerpSpeedMultiplier(jumpingSpeedMultiplier, speedChangeRate);
         }
+
+        animator.SetBool("Grounded", state == PlayerStates.Grounded);
+        animator.SetBool("Wall Clinging", state == PlayerStates.WallClinging);
     }
 
     private void FixedUpdate()
@@ -246,6 +251,7 @@ public class Movement : MonoBehaviour
             {
                 //Jumping
                 velocity.y = jumpForce;
+                animator.SetTrigger("Jump");
             }
             else if (state == PlayerStates.WallClinging)
             {
@@ -256,15 +262,18 @@ public class Movement : MonoBehaviour
                     //Wall kicking to the left
                     horizontalForce = -wallKickVelocity.x;
                     velocity.y = wallKickVelocity.y;
+                    animator.SetTrigger("Wall Action");
                 } else if (playerHorizontalInput == 1 && Math.Abs(transform.rotation.eulerAngles.y) == 180)
                 {
                     //Wall kicking to the right
                     horizontalForce = wallKickVelocity.x;
                     velocity.y = wallKickVelocity.y;
+                    animator.SetTrigger("Wall Action");
                 } else
                 {
                     //Wall Jumping
                     velocity.y = wallJumpForce;
+                    animator.SetTrigger("Wall Action");
                 }
 
                 state = PlayerStates.InAir;
@@ -279,15 +288,20 @@ public class Movement : MonoBehaviour
         {
             if (rb.CircleCast(Vector2.right, rightCastDistance))
             {
-                state = PlayerStates.WallClinging;
-                transform.rotation = Quaternion.Euler(0, 0, 0);
+                WallCling(true);
             }
             else if (rb.CircleCast(Vector2.left, leftCastDistance))
             {
-                state = PlayerStates.WallClinging;
-                transform.rotation = Quaternion.Euler(0, 180, 0);
+                WallCling(false);
             }
         }
+    }
+
+    private void WallCling(bool facingRight)
+    {
+        state = PlayerStates.WallClinging;
+        transform.rotation = Quaternion.Euler(0, facingRight ? 0 : 180, 0);
+        animator.SetTrigger("Wall Cling");
     }
 
     private void Gravity()
@@ -311,6 +325,8 @@ public class Movement : MonoBehaviour
         {
             velocity.y = Mathf.Max(velocity.y, 0f);
         }
+
+        animator.SetBool("Falling", falling);
     }
     #endregion
 

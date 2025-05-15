@@ -1,10 +1,13 @@
 fileFormatVersion: 2
-guid: d12eb89e5b37de94eb96338d08a4a3bd
+guid: b5b7358a6e3beb84ab858f926f632b87
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3876497900317922485
-    second: Miner_0
+      213: -7220261162079084122
+    second: Player Wall Clinging Spritesheet 1_0
+  - first:
+      213: -4782848903450139925
+    second: Player Wall Clinging Spritesheet 1_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,12 +116,12 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Miner_0
+      name: Player Wall Clinging Spritesheet 1_0
       rect:
         serializedVersion: 2
-        x: 2
-        y: 0
-        width: 13
+        x: 0
+        y: 32
+        width: 16
         height: 16
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -128,8 +131,96 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5b45ff04d461cc530800000000000000
-      internalID: 3876497900317922485
+      spriteID: 6a12ab84aba7ccb90800000000000000
+      internalID: -7220261162079084122
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player Wall Clinging Spritesheet 1_1
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 32
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: be2ec7f4348ef9db0800000000000000
+      internalID: -4782848903450139925
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player Wall Clinging Spritesheet 1_2
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 16
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c59d42156f027b54289e2fc1851e3206
+      internalID: -1780447608
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player Wall Clinging Spritesheet 1_3
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 16
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6ef3976efe05af04d90a4261e20bb959
+      internalID: 601751358
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Player Wall Clinging Spritesheet 1_4
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 52453f533bcf2eb4aa5d8beb93d3f50b
+      internalID: -1679923655
       vertices: []
       indices: 
       edges: []
@@ -138,7 +229,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 6ad27fa655ec4df48858d01886e07116
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +239,11 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Miner_0: 3876497900317922485
+      Player Wall Clinging Spritesheet 1_0: -7220261162079084122
+      Player Wall Clinging Spritesheet 1_1: -4782848903450139925
+      Player Wall Clinging Spritesheet 1_2: -1780447608
+      Player Wall Clinging Spritesheet 1_3: 601751358
+      Player Wall Clinging Spritesheet 1_4: -1679923655
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

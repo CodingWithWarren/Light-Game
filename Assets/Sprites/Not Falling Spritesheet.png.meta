@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: d12eb89e5b37de94eb96338d08a4a3bd
+guid: 942e69873e7aaa345a10defa50abc0e5
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3876497900317922485
-    second: Miner_0
+      213: 3942181610413164058
+    second: NotFalling_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,12 +113,12 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Miner_0
+      name: Not Falling Spritesheet_0
       rect:
         serializedVersion: 2
-        x: 2
-        y: 0
-        width: 13
+        x: 0
+        y: 16
+        width: 16
         height: 16
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -126,10 +126,32 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 5b45ff04d461cc530800000000000000
-      internalID: 3876497900317922485
+      spriteID: 5340dba4da916054da8da617ea4be076
+      internalID: 2070127715
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Not Falling Spritesheet_1
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 248b65fdb6e4b30499a0498bbba8ea6f
+      internalID: -102673745
       vertices: []
       indices: 
       edges: []
@@ -138,7 +160,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 6afedab31410c5244b07bfab4f68c562
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +170,8 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Miner_0: 3876497900317922485
+      Not Falling Spritesheet_0: 2070127715
+      Not Falling Spritesheet_1: -102673745
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

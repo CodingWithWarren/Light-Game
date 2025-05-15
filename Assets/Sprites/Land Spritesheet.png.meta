@@ -1,10 +1,13 @@
 fileFormatVersion: 2
-guid: d12eb89e5b37de94eb96338d08a4a3bd
+guid: 1c2daf2e9c9b3dc44ba0f75b2ecc96ab
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3876497900317922485
-    second: Miner_0
+      213: -8785948587356212977
+    second: Land Spritesheet_0
+  - first:
+      213: -2130202155218221290
+    second: Land Spritesheet_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,12 +116,12 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Miner_0
+      name: Land Spritesheet_0
       rect:
         serializedVersion: 2
-        x: 2
-        y: 0
-        width: 13
+        x: 0
+        y: 16
+        width: 16
         height: 16
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -128,8 +131,30 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5b45ff04d461cc530800000000000000
-      internalID: 3876497900317922485
+      spriteID: f01b9cb4f4a021680800000000000000
+      internalID: -8785948587356212977
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Land Spritesheet_1
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 61742761d600072e0800000000000000
+      internalID: -2130202155218221290
       vertices: []
       indices: 
       edges: []
@@ -138,7 +163,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: fb43a57d6095f2b4abe0ac382382c862
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +173,8 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Miner_0: 3876497900317922485
+      Land Spritesheet_0: -8785948587356212977
+      Land Spritesheet_1: -2130202155218221290
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
