@@ -91,16 +91,7 @@ public class Movement : MonoBehaviour
             state = PlayerStates.Grounded;
 
             LerpSpeedMultiplier(groundedSpeedMultiplier, speedChangeRate);
-
-            if (velocity.x != 0)
-            {
-                animator.SetBool("Moving", true);
-                print("moving");
-            } else
-            {
-                animator.SetBool("Moving", false);
-            }
-
+            animator.SetBool("Moving", velocity.x != 0);
         }
         else if (state == PlayerStates.WallClinging)
         {
@@ -114,7 +105,8 @@ public class Movement : MonoBehaviour
             LerpSpeedMultiplier(jumpingSpeedMultiplier, speedChangeRate);
         }
 
-        animator.SetBool("Grounded", groundedHit);
+        animator.SetBool("Grounded", state == PlayerStates.Grounded);
+        animator.SetBool("Wall Clinging", state == PlayerStates.WallClinging);
     }
 
     private void FixedUpdate()
@@ -270,16 +262,18 @@ public class Movement : MonoBehaviour
                     //Wall kicking to the left
                     horizontalForce = -wallKickVelocity.x;
                     velocity.y = wallKickVelocity.y;
+                    animator.SetTrigger("Wall Action");
                 } else if (playerHorizontalInput == 1 && Math.Abs(transform.rotation.eulerAngles.y) == 180)
                 {
                     //Wall kicking to the right
                     horizontalForce = wallKickVelocity.x;
                     velocity.y = wallKickVelocity.y;
+                    animator.SetTrigger("Wall Action");
                 } else
                 {
                     //Wall Jumping
                     velocity.y = wallJumpForce;
-                    animator.SetTrigger("Jump");
+                    animator.SetTrigger("Wall Action");
                 }
 
                 state = PlayerStates.InAir;
@@ -294,15 +288,20 @@ public class Movement : MonoBehaviour
         {
             if (rb.CircleCast(Vector2.right, rightCastDistance))
             {
-                state = PlayerStates.WallClinging;
-                transform.rotation = Quaternion.Euler(0, 0, 0);
+                WallCling(true);
             }
             else if (rb.CircleCast(Vector2.left, leftCastDistance))
             {
-                state = PlayerStates.WallClinging;
-                transform.rotation = Quaternion.Euler(0, 180, 0);
+                WallCling(false);
             }
         }
+    }
+
+    private void WallCling(bool facingRight)
+    {
+        state = PlayerStates.WallClinging;
+        transform.rotation = Quaternion.Euler(0, facingRight ? 0 : 180, 0);
+        animator.SetTrigger("Wall Cling");
     }
 
     private void Gravity()
