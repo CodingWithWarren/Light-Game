@@ -500,6 +500,7 @@ GameObject:
   - component: {fileID: 519420031}
   - component: {fileID: 519420029}
   - component: {fileID: 519420030}
+  - component: {fileID: 519420033}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -625,6 +626,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &519420033
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519420028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73950f8bd09cf094cb834d028b05823f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 869591288}
+  followDistance: 2
+  cameraSpeed: 4
+  cameraMaxDistanceAway: 6
+  followingPlayer: 0
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -871,6 +889,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &869591288 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8326640427627309009, guid: 97d133d911823be40b26bb3b0597d9ac, type: 3}
+  m_PrefabInstance: {fileID: 5084119624734876021}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &926446055
 GameObject:
   m_ObjectHideFlags: 0
@@ -1159,7 +1182,7 @@ Transform:
   m_GameObject: {fileID: 1795655890}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 8.5, y: 2.25, z: 0}
   m_LocalScale: {x: 0.5, y: 0.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1390,6 +1413,14 @@ PrefabInstance:
     - target: {fileID: 595806807475602134, guid: 97d133d911823be40b26bb3b0597d9ac, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2992044215194698133, guid: 97d133d911823be40b26bb3b0597d9ac, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2992044215194698133, guid: 97d133d911823be40b26bb3b0597d9ac, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 8326640427627309009, guid: 97d133d911823be40b26bb3b0597d9ac, type: 3}
       propertyPath: m_Name
