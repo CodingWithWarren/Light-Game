@@ -1,46 +1,54 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
     public GameObject player;
 
+    [Header("")]
     public float followDistance = 5;
     public float cameraSpeed;
     public float cameraMaxDistanceAway = 6;
-    [SerializeField] bool followingPlayer = false;
+    public float groundedYPosModifier = 1.5f;
+    public float yPosModifierLerpRate = 1f;
+    [SerializeField] private float yPosModifier = 0;
+    [SerializeField] bool followingPlayer = true;
 
     private Vector2 playerPosition => new Vector2(player.transform.position.x, player.transform.position.y);
     private Vector2 cameraPosition => new Vector2(transform.position.x, transform.position.y);
     private float distanceToPlayer => Vector2.Distance(playerPosition, cameraPosition);
+    Vector2 targetPosition => new Vector2(playerPosition.x, playerPosition.y + yPosModifier);
+    float distanceFromTarget => Vector2.Distance(targetPosition, cameraPosition); //target position is just the player position with yPosModifier
 
     private Vector2 distanceToMove;
 
     private void Update()
-    {
-        print(Vector2.Distance(playerPosition, cameraPosition) > followDistance);
-        if (distanceToPlayer > followDistance && !followingPlayer)
+    { 
+        if (distanceFromTarget > followDistance && !followingPlayer)
         {
             followingPlayer = true;
         }
+
+        yPosModifier = player.GetComponent<Movement>().state == Movement.PlayerStates.Grounded ? groundedYPosModifier : 0; //Setting the yPosModifier to grounded yPosModifier when grounded
     }
 
     private void LateUpdate()
     {
         if (followingPlayer)
         {
-            if (distanceToPlayer >= cameraMaxDistanceAway)
+            if (distanceFromTarget >= cameraMaxDistanceAway)
             {
-                distanceToMove += (distanceToPlayer - cameraMaxDistanceAway) * (playerPosition - cameraPosition).normalized;
+                distanceToMove = (distanceFromTarget - cameraMaxDistanceAway) * (playerPosition - cameraPosition).normalized; //The distance from the camera to cameraMaxDistanceAway away from the player
             } else
             {
-                distanceToMove = (playerPosition - cameraPosition).normalized * cameraSpeed * Time.deltaTime;
+                distanceToMove = (targetPosition - cameraPosition).normalized * cameraSpeed * Time.deltaTime;
             }
 
             transform.position += new Vector3(distanceToMove.x, distanceToMove.y, 0);
 
-            if (distanceToPlayer < cameraSpeed * Time.deltaTime)
+            if (distanceFromTarget < cameraSpeed * Time.deltaTime)
             {
-                transform.position = new Vector3(playerPosition.x, playerPosition.y, -10);
+                transform.position = new Vector3(playerPosition.x, playerPosition.y + yPosModifier, -10);
                 followingPlayer = false;
             }
         }

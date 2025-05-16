@@ -15,7 +15,7 @@ public class Movement : MonoBehaviour
         WallClinging
     }
     [Header("General")]
-    [SerializeField] PlayerStates state = PlayerStates.Grounded;
+    [SerializeField] public PlayerStates state { get; private set; } = PlayerStates.Grounded;
     [SerializeField] Vector2 velocity = Vector2.zero;
 
     private Rigidbody2D rb;
