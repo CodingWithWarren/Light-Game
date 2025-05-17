@@ -1231,7 +1231,7 @@ GameObject:
   m_Component:
   - component: {fileID: 926446057}
   - component: {fileID: 926446056}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1935,11 +1935,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 595806807475602134, guid: 97d133d911823be40b26bb3b0597d9ac, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 11.75
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 595806807475602134, guid: 97d133d911823be40b26bb3b0597d9ac, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.5
+      value: -2
       objectReference: {fileID: 0}
     - target: {fileID: 595806807475602134, guid: 97d133d911823be40b26bb3b0597d9ac, type: 3}
       propertyPath: m_LocalPosition.z
@@ -1972,26 +1972,6 @@ PrefabInstance:
     - target: {fileID: 595806807475602134, guid: 97d133d911823be40b26bb3b0597d9ac, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2992044215194698133, guid: 97d133d911823be40b26bb3b0597d9ac, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2992044215194698133, guid: 97d133d911823be40b26bb3b0597d9ac, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6124353762465176645, guid: 97d133d911823be40b26bb3b0597d9ac, type: 3}
-      propertyPath: wallJumpForce
-      value: 12
-      objectReference: {fileID: 0}
-    - target: {fileID: 6124353762465176645, guid: 97d133d911823be40b26bb3b0597d9ac, type: 3}
-      propertyPath: leftCastDistance
-      value: 0.2
-      objectReference: {fileID: 0}
-    - target: {fileID: 6124353762465176645, guid: 97d133d911823be40b26bb3b0597d9ac, type: 3}
-      propertyPath: rightCastDistance
-      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 8326640427627309009, guid: 97d133d911823be40b26bb3b0597d9ac, type: 3}
       propertyPath: m_Name
