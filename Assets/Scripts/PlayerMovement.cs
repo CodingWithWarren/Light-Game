@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 [RequireComponent (typeof(Rigidbody2D))]
-public class Movement : MonoBehaviour
+public class PlayerMovement : MonoBehaviour
 {
     public enum PlayerStates
     {
@@ -39,8 +39,10 @@ public class Movement : MonoBehaviour
 
     [Header("Jumping & Gravity")]
     public float jumpForce = 12f;
+    public float coyoteTimeSeconds = 0.1f;
     public float gravityMultipler = 1f;
     public float terminalVelocity = -15f;
+    [SerializeField] float airTime = 0f;
 
     [Header("Wall Actions")]
     public float wallJumpForce = 10f;
@@ -74,16 +76,12 @@ public class Movement : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            Rigidbody2D flareRb = Instantiate(this.flare, transform.position + new Vector3(-0.5f, 0.25f, 0), Quaternion.identity).GetComponent<Rigidbody2D>();
-        }
-
         //Checking whether or not player is grounded
         bool groundedHit = rb.CircleCast(Vector2.down, groundCastDistance);
 
         SetRotation();
         CheckForWallTouch();
+        AirTime();
 
         //Calculating Player State
         if (groundedHit)
@@ -247,10 +245,11 @@ public class Movement : MonoBehaviour
     {
         if (context.performed) 
         {
-            if (state == PlayerStates.Grounded || rb.CircleCast(Vector2.down, groundCastDistance))
+            if (state == PlayerStates.Grounded || airTime <= coyoteTimeSeconds)
             {
                 //Jumping
                 velocity.y = jumpForce;
+                airTime += coyoteTimeSeconds;
                 animator.SetTrigger("Jump");
             }
             else if (state == PlayerStates.WallClinging)
@@ -279,6 +278,17 @@ public class Movement : MonoBehaviour
                 state = PlayerStates.InAir;
                 touchingWall = false;
             }
+        }
+    }
+
+    private void AirTime()
+    {
+        if (state != PlayerStates.Grounded)
+        {
+            airTime += Time.deltaTime;
+        } else
+        {
+            airTime = 0;
         }
     }
 

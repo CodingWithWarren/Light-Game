@@ -133,7 +133,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b38f20be79c665c46b8c522fad6cf6be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  state: 0
   velocity: {x: 0, y: 0}
   speed: 5
   speedChangeRate: 0.7
@@ -146,14 +145,16 @@ MonoBehaviour:
   accelerationTime: 0.15
   halfAccelerationOnTurn: 1
   jumpForce: 12
+  coyoteTimeSeconds: 0.1
   gravityMultipler: 3
   terminalVelocity: -15
-  wallJumpForce: 10
+  airTime: 0
+  wallJumpForce: 12
   wallKickVelocity: {x: 6, y: 5}
   touchingWall: 0
   groundCastDistance: 0.3
-  rightCastDistance: 0.16
-  leftCastDistance: 0.16
+  rightCastDistance: 0.2
+  leftCastDistance: 0.2
   flareForce: {x: 5, y: 5}
   flareTorque: 50
   flare: {fileID: 3904417549022440846, guid: 95329abbbd575d34da4f76e01cb5b76e, type: 3}

@@ -29,7 +29,7 @@ public class CameraController : MonoBehaviour
             followingPlayer = true;
         }
 
-        yPosModifier = player.GetComponent<Movement>().state == Movement.PlayerStates.Grounded ? groundedYPosModifier : 0; //Setting the yPosModifier to grounded yPosModifier when grounded
+        yPosModifier = player.GetComponent<PlayerMovement>().state == PlayerMovement.PlayerStates.Grounded ? groundedYPosModifier : 0; //Setting the yPosModifier to grounded yPosModifier when grounded
     }
 
     private void LateUpdate()
