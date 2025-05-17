@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 [RequireComponent (typeof(Rigidbody2D))]
-public class Movement : MonoBehaviour
+public class PlayerMovement : MonoBehaviour
 {
     public enum PlayerStates
     {
