@@ -11,8 +11,6 @@ GameObject:
   - component: {fileID: 4389470208927109042}
   - component: {fileID: 5123203111589033894}
   - component: {fileID: 5539208867491738088}
-  - component: {fileID: 4708431289049669241}
-  - component: {fileID: 4408208950267491505}
   m_Layer: 3
   m_Name: Flare
   m_TagString: Untagged
@@ -101,60 +99,6 @@ CapsuleCollider2D:
   m_Offset: {x: -0.0010858178, y: 0.00053849816}
   m_Size: {x: 0.24795711, y: 0.49918073}
   m_Direction: 0
---- !u!70 &4708431289049669241
-CapsuleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3904417549022440846}
-  m_Enabled: 0
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_Size: {x: 0.25, y: 0.5}
-  m_Direction: 0
---- !u!114 &4408208950267491505
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3904417549022440846}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1ff78144a8d92b94891aae84a754005b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  velocity: {x: 0, y: 0}
-  startVelocity: {x: 6, y: 6}
-  bounceYForce: 0
-  bounceXForce: 0
-  maxBounces: 3
 --- !u!1 &5934813058149162160
 GameObject:
   m_ObjectHideFlags: 0
