@@ -47,7 +47,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("Wall Actions")]
     public float wallJumpForce = 10f;
     public Vector2 wallKickVelocity = new Vector2(10, 5);
-    [SerializeField] bool touchingWall = false;
+    public bool touchingWall = false;
 
     [Header("Circle Cast")]
     public float groundCastDistance = 0.3f;
