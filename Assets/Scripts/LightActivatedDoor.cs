@@ -8,7 +8,7 @@ public class LightActivatedDoor : MonoBehaviour
     private GameObject doorPiece;
     private GameObject lightPiece;
 
-    private List<GameObject> detectedLights = new List<GameObject>();
+    private int detectedLightCount = 0;
 
     private Vector3 originalDoorPosition;
     public Vector3 offset = new Vector3(0, 2.1f, 0);
@@ -29,7 +29,7 @@ public class LightActivatedDoor : MonoBehaviour
     {
         if (collision.gameObject.tag == "Light")
         {
-            detectedLights.Add(collision.gameObject);
+            detectedLightCount++;
 
             if (!doorOpen)
             {
@@ -43,13 +43,9 @@ public class LightActivatedDoor : MonoBehaviour
     {
         if (collision.gameObject.tag == "Light")
         {
-            if (detectedLights.Contains(collision.gameObject))
-            {
-                detectedLights.Remove(collision.gameObject);
-            }
+            detectedLightCount--;
 
-
-            if (doorOpen && detectedLights.Count <= 0)
+            if (doorOpen && detectedLightCount <= 0)
             {
                 StartCoroutine(CloseDoor());
                 doorOpen = false;
