@@ -3,8 +3,16 @@ using UnityEngine;
 public class PlayerActions : MonoBehaviour
 {
     [SerializeField] private GameObject projectilePrefab;
-    [SerializeField] private float throwForce = 10f;
-    [SerializeField] private float maxThrowRange = 5f; // max cursor distance that affects speed
+
+    public float defaultForce = 7f;
+    public float maxForce = 12f;
+
+    public float forcePercentage { get; private set; } = 0;
+
+    private const float minHoldDuration = 0.1f;
+    public float maxHoldDuration { get; private set; } = 0.5f; 
+
+    private float startTime = 0;
 
     private Camera mainCam;
 
@@ -17,9 +25,42 @@ public class PlayerActions : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0)) // Left click
         {
+            startTime = Time.time;
+        }
+        else if (Input.GetMouseButtonUp(0))
+        {
+            float time = Time.time - startTime;
             ThrowFlare();
+            startTime = 0;
+        }
+
+        if (startTime != 0)
+        {
+            float time = Time.time - startTime;
+            if (time > minHoldDuration)
+            {
+                forcePercentage = Mathf.Clamp01((time - minHoldDuration) / maxHoldDuration);
+            }
+        } else
+        {
+            forcePercentage = 0;
         }
     }
+
+    //private float CalculateForce(float time)
+    //{
+    //    if (time >= minHoldDuration)
+    //    {
+    //        //Setting time to be a value between 0 and maxHoldDuration, while accounting for minHoldDuration
+    //        time = Mathf.Clamp(time, minHoldDuration, minHoldDuration + maxHoldDuration) - minHoldDuration;
+
+    //        float percentage = time / maxHoldDuration;
+    //        return percentage * maxForce;
+    //    } else
+    //    {
+    //        return defaultForce;
+    //    }
+    //}
 
     void ThrowFlare()
     {
@@ -27,17 +68,12 @@ public class PlayerActions : MonoBehaviour
         mousePos.z = 0f;
 
         Vector2 direction = (mousePos - transform.position).normalized;
-        float distance = Vector2.Distance(transform.position, mousePos);
-
-        // Normalize and clamp distance between 0 and 1
-        float t = Mathf.Clamp01(distance / maxThrowRange);
-        float scaledForce = Mathf.Lerp(throwForce * 0.3f, throwForce, t);
 
         GameObject projectile = Instantiate(projectilePrefab, transform.position, Quaternion.identity);
         Rigidbody2D rb = projectile.GetComponent<Rigidbody2D>();
         if (rb != null)
         {
-            rb.linearVelocity = direction * scaledForce;
+            rb.linearVelocity = direction * Mathf.Clamp(forcePercentage * maxForce, defaultForce, maxForce); //Makes force at least the min force
         }
     }
 }

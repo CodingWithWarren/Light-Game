@@ -45,7 +45,7 @@ public class LightActivatedDoor : MonoBehaviour
         {
             detectedLightCount--;
 
-            if (doorOpen && detectedLightCount <= 0)
+            if (doorOpen && detectedLightCount <= 0 && gameObject.activeSelf)
             {
                 StartCoroutine(CloseDoor());
                 doorOpen = false;
