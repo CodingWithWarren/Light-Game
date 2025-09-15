@@ -17,6 +17,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("General")]
     [SerializeField] public PlayerStates state { get; private set; } = PlayerStates.Grounded;
     [SerializeField] Vector2 velocity = Vector2.zero;
+    private bool disableMovement = false;
 
     private Rigidbody2D rb;
     private Animator animator;
@@ -31,6 +32,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("Horizontal Force")]
     public float horizontalForce = 0f;
     [SerializeField] float horizontalForceDecreaseRate = 1.05f;
+    private float manualXInput = 0;
 
     [Header("Acceleration")]
     [SerializeField] float acceleration = 0f;
@@ -176,6 +178,11 @@ public class PlayerMovement : MonoBehaviour
     private void CalculateAcceleration()
     {
         float moveActionXInput = moveAction.ReadValue<Vector2>().x;
+        if (disableMovement)
+        {
+            moveActionXInput = manualXInput;
+        }
+        
         float accelerationMultiplier = 1;
 
         if (moveActionXInput != 0)
@@ -245,7 +252,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (context.performed) 
         {
-            if (state == PlayerStates.Grounded || airTime <= coyoteTimeSeconds)
+            if ((state == PlayerStates.Grounded || airTime <= coyoteTimeSeconds) && !disableMovement)
             {
                 //Jumping
                 velocity.y = jumpForce;
@@ -294,7 +301,7 @@ public class PlayerMovement : MonoBehaviour
 
     public void WallClingInput(InputAction.CallbackContext context)
     {
-        if (context.performed && state == PlayerStates.InAir)
+        if (context.performed && state == PlayerStates.InAir && !disableMovement)
         {
             if (rb.CircleCast(Vector2.right, rightCastDistance))
             {
@@ -337,6 +344,31 @@ public class PlayerMovement : MonoBehaviour
         }
 
         animator.SetBool("Falling", falling);
+    }
+    #endregion
+
+    #region Manual Movement
+    public void DisableMovement()
+    {
+        manualXInput = 0;
+        disableMovement = true;
+    }
+
+    public void EnableMovement()
+    {
+        disableMovement = false;
+    }
+
+    public void ManualMove(int xInput)
+    {
+        DisableMovement();
+        manualXInput = xInput;
+    }
+
+    public void StopManualMovement()
+    {
+        manualXInput = 0;
+        EnableMovement();
     }
     #endregion
 
