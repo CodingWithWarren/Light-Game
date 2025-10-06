@@ -56,9 +56,12 @@ public class PlayerMovement : MonoBehaviour
     public float rightCastDistance = 0.15f;
     public float leftCastDistance = 0.12f;
 
+    [Header("Camera thingies")]
+    public bool isFacingRight { get; private set; } = true;
+    [SerializeField] private GameObject cameraFollowGO;
+    private CameraFollowObject cameraFollowObject;
+
     [Header("")]
-    public Vector2 flareForce = new Vector2(5f, 5f);
-    public float flareTorque = 50f;
 
     public GameObject flare;
 
@@ -74,6 +77,8 @@ public class PlayerMovement : MonoBehaviour
         inputActionAsset = playerInput.actions;
         jumpButton = inputActionAsset.FindActionMap("Player").FindAction("Jump");
         moveAction = inputActionAsset.FindActionMap("Player").FindAction("Move");
+
+        cameraFollowObject = cameraFollowGO.GetComponent<CameraFollowObject>();
     }
 
     void Update()
@@ -145,12 +150,16 @@ public class PlayerMovement : MonoBehaviour
     public void SetRotation()
     {
         //Setting rotation based off of whether horizontal input is greather/less than zero
-        if (velocity.x < 0 && transform.rotation == Quaternion.Euler(0, 0, 0))
+        if (velocity.x < 0 && transform.rotation == Quaternion.Euler(0, 0, 0) && !isFacingRight)
         {
             transform.rotation = Quaternion.Euler(0, 180, 0);
-        } else if (velocity.x > 0)
+            isFacingRight = true;
+            cameraFollowObject.CallTurn();
+        } else if (velocity.x > 0 && isFacingRight)
         {
             transform.rotation = Quaternion.Euler(0, 0, 0);
+            isFacingRight = false;
+            cameraFollowObject.CallTurn();
         }
     }
 

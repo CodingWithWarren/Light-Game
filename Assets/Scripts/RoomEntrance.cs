@@ -9,6 +9,7 @@ public class RoomEntrance : MonoBehaviour
 {
     public GameObject nextEntrance;
     public GameObject blackScreen;
+    public GameObject cameraFollowPlayerObject;
 
     private BoxCollider2D boxCollider;
 
@@ -67,7 +68,7 @@ public class RoomEntrance : MonoBehaviour
             playerMovement.ManualMove(1);
         }
 
-        blackScreen.transform.position = new Vector2(Camera.main.transform.position.x, Camera.main.transform.position.y);
+        blackScreen.transform.position = new Vector2(cameraFollowPlayerObject.transform.position.x, cameraFollowPlayerObject.transform.position.y);
 
         nextEntrance.GetComponent<RoomEntrance>().active = false;
         blackScreen.LeanAlpha(1, transitionDuration);
