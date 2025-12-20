@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.InputSystem;
@@ -44,6 +45,7 @@ public class PlayerMovement : MonoBehaviour
     public float coyoteTimeSeconds = 0.1f;
     public float gravityMultipler = 1f;
     public float terminalVelocity = -15f;
+    [SerializeField] bool hardFalling = false;
     [SerializeField] float airTime = 0f;
 
     [Header("Wall Actions")]
@@ -60,6 +62,13 @@ public class PlayerMovement : MonoBehaviour
     public bool isFacingRight { get; private set; } = true;
     [SerializeField] private GameObject cameraFollowGO;
     private CameraFollowObject cameraFollowObject;
+    private float fallSpeedYDampingChangeThreshold;
+
+    [Header("Particles")]
+    private ParticleSystem wallClingParticle;
+    private ParticleSystem hardLandParticle;
+
+    private bool playingHardLandParticle = false;
 
     [Header("")]
 
@@ -79,6 +88,14 @@ public class PlayerMovement : MonoBehaviour
         moveAction = inputActionAsset.FindActionMap("Player").FindAction("Move");
 
         cameraFollowObject = cameraFollowGO.GetComponent<CameraFollowObject>();
+
+        wallClingParticle = transform.Find("Wall Cling Particle").GetComponent<ParticleSystem>();
+        hardLandParticle = transform.Find("Hard Land Particle").GetComponent<ParticleSystem>();
+    }
+
+    private void Start()
+    {
+        fallSpeedYDampingChangeThreshold = CameraManager.instance.fallSpeedYDampingChangeThreshold;
     }
 
     void Update()
@@ -86,32 +103,31 @@ public class PlayerMovement : MonoBehaviour
         //Checking whether or not player is grounded
         bool groundedHit = rb.CircleCast(Vector2.down, groundCastDistance);
 
+        //setting hardFalling
+        hardFalling = velocity.y == terminalVelocity;
+
         SetRotation();
         CheckForWallTouch();
         AirTime();
+        CalculateState(groundedHit);
 
-        //Calculating Player State
-        if (groundedHit)
+        //if we are falling past a speed threshold
+        if (velocity.y < fallSpeedYDampingChangeThreshold && !CameraManager.instance.isLerpingYDamping && !CameraManager.instance.lerpedFromPlayerFalling)
         {
-            state = PlayerStates.Grounded;
-
-            LerpSpeedMultiplier(groundedSpeedMultiplier, speedChangeRate);
-            animator.SetBool("Moving", velocity.x != 0);
-        }
-        else if (state == PlayerStates.WallClinging)
-        {
-            //Stops velocity if wall clinging
-            velocity = Vector2.zero;
-        }
-        else
-        {
-            state = PlayerStates.InAir;
-
-            LerpSpeedMultiplier(jumpingSpeedMultiplier, speedChangeRate);
+            CameraManager.instance.isPlayerFalling = true;
+            CameraManager.instance.LerpYDamping(true);
         }
 
-        animator.SetBool("Grounded", state == PlayerStates.Grounded);
-        animator.SetBool("Wall Clinging", state == PlayerStates.WallClinging);
+        //if we are standing still or moving up
+        if (velocity.y >= 0f && !CameraManager.instance.isLerpingYDamping && CameraManager.instance.lerpedFromPlayerFalling)
+        {
+            CameraManager.instance.isPlayerFalling = false;
+
+            //reset it so it can be called again
+            CameraManager.instance.lerpedFromPlayerFalling = false;
+
+            CameraManager.instance.LerpYDamping(false);
+        }
     }
 
     private void FixedUpdate()
@@ -128,6 +144,38 @@ public class PlayerMovement : MonoBehaviour
 
         //Actually moving the player
         rb.MovePosition(rb.position + velocity * Time.fixedDeltaTime);
+    }
+
+    private void CalculateState(bool groundedHit)
+    {
+        //Calculating Player State
+        if (groundedHit)
+        {
+            state = PlayerStates.Grounded;
+
+            LerpSpeedMultiplier(groundedSpeedMultiplier, speedChangeRate);
+            animator.SetBool("Moving", velocity.x != 0);
+
+            if (hardFalling && !playingHardLandParticle)
+            {
+                StartCoroutine(PlayHardLandParticle());
+                hardFalling = false;
+            }
+        }
+        else if (state == PlayerStates.WallClinging)
+        {
+            //Stops velocity if wall clinging
+            velocity = Vector2.zero;
+        }
+        else
+        {
+            state = PlayerStates.InAir;
+
+            LerpSpeedMultiplier(jumpingSpeedMultiplier, speedChangeRate);
+        }
+
+        animator.SetBool("Grounded", state == PlayerStates.Grounded);
+        animator.SetBool("Wall Clinging", state == PlayerStates.WallClinging);
     }
 
     #region Horizontal Movement
@@ -308,28 +356,6 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    public void WallClingInput(InputAction.CallbackContext context)
-    {
-        if (context.performed && state == PlayerStates.InAir && !disableMovement)
-        {
-            if (rb.CircleCast(Vector2.right, rightCastDistance))
-            {
-                WallCling(true);
-            }
-            else if (rb.CircleCast(Vector2.left, leftCastDistance))
-            {
-                WallCling(false);
-            }
-        }
-    }
-
-    private void WallCling(bool facingRight)
-    {
-        state = PlayerStates.WallClinging;
-        transform.rotation = Quaternion.Euler(0, facingRight ? 0 : 180, 0);
-        animator.SetTrigger("Wall Cling");
-    }
-
     private void Gravity()
     {
         bool falling = velocity.y < 0 ? true : false;
@@ -354,9 +380,65 @@ public class PlayerMovement : MonoBehaviour
 
         animator.SetBool("Falling", falling);
     }
+
+    private IEnumerator PlayHardLandParticle()
+    {
+        Vector3 particlePosition = new Vector3(transform.position.x, transform.position.y - 0.45f);
+        GameObject particle = Instantiate(hardLandParticle.gameObject, particlePosition, Quaternion.identity);
+        particle.GetComponent<ParticleSystem>().Play();
+        playingHardLandParticle = true;
+
+        yield return new WaitForSeconds(hardLandParticle.main.duration);
+        playingHardLandParticle = false;
+        Destroy(particle);
+    }
     #endregion
 
-    #region Manual Movement
+    #region Wall Clinging
+
+    public void WallClingInput(InputAction.CallbackContext context)
+    {
+        if (context.performed && state == PlayerStates.InAir && !disableMovement)
+        {
+            if (rb.CircleCast(Vector2.right, rightCastDistance) && !rb.CircleCastObject(Vector2.right, rightCastDistance).CompareTag("Cannot Wall Cling"))
+            {
+                WallCling(true);
+            }
+            else if (rb.CircleCast(Vector2.left, leftCastDistance) && !rb.CircleCastObject(Vector2.left, leftCastDistance).CompareTag("Cannot Wall Cling"))
+            {
+                WallCling(false);
+            }
+        }
+    }
+
+    private void WallCling(bool facingRight)
+    {
+        state = PlayerStates.WallClinging;
+        transform.rotation = Quaternion.Euler(0, facingRight ? 0 : 180, 0);
+        animator.SetTrigger("Wall Cling");
+        StartCoroutine(PlayWallClingParticle(facingRight));
+    }
+
+    private IEnumerator PlayWallClingParticle(bool facingRight)
+    {
+        //offsetting the particle's x position based off where the pixaxe will be
+        float particleX = transform.position.x + (facingRight ? 0.3f : -0.3f);
+        Vector3 particlePosition = new Vector3(particleX, transform.position.y, 0);
+
+        GameObject particle = Instantiate(wallClingParticle.gameObject, particlePosition, transform.rotation);
+
+        yield return new WaitForSeconds(0.06f); //duration of the pickaxe swinging animation
+
+        particle.GetComponent<ParticleSystem>().Play();
+
+        yield return new WaitForSeconds(wallClingParticle.main.duration);
+
+        Destroy(particle);
+    }
+
+    #endregion
+
+    #region Manual Stuff
     public void DisableMovement()
     {
         manualXInput = 0;
@@ -370,6 +452,10 @@ public class PlayerMovement : MonoBehaviour
 
     public void ManualMove(int xInput)
     {
+        xInput = Math.Clamp(xInput, -1, 1);
+
+        transform.rotation = new Quaternion(0, xInput != 0 ? xInput > 0 ? 0 : 180 : transform.rotation.y, 0, 0);
+
         DisableMovement();
         manualXInput = xInput;
     }
@@ -378,6 +464,17 @@ public class PlayerMovement : MonoBehaviour
     {
         manualXInput = 0;
         EnableMovement();
+    }
+
+    public void SetManualVelocity(Vector2 setVelocity, float timeSeconds, bool enableMovementAfter)
+    {
+        DisableMovement();
+        velocity = setVelocity;
+        
+        if (enableMovementAfter)
+        {
+            EnableMovement();
+        }
     }
     #endregion
 

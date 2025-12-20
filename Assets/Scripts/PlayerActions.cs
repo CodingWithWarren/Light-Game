@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PlayerActions : MonoBehaviour
 {
-    [SerializeField] private GameObject projectilePrefab;
+    [SerializeField] public GameObject flarePrefab;
 
     public float defaultForce = 7f;
     public float maxForce = 12f;
@@ -15,10 +15,12 @@ public class PlayerActions : MonoBehaviour
     private float startTime = 0;
 
     private Camera mainCam;
+    private GameObject flareParentObject;
 
     void Start()
     {
         mainCam = Camera.main;
+        flareParentObject = GameObject.Find("Flares");
     }
 
     void Update()
@@ -69,7 +71,7 @@ public class PlayerActions : MonoBehaviour
 
         Vector2 direction = (mousePos - transform.position).normalized;
 
-        GameObject projectile = Instantiate(projectilePrefab, transform.position, Quaternion.identity);
+        GameObject projectile = Instantiate(flarePrefab, transform.position, Quaternion.identity, flareParentObject.transform);
         Rigidbody2D rb = projectile.GetComponent<Rigidbody2D>();
         if (rb != null)
         {

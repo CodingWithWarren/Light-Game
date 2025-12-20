@@ -13,8 +13,8 @@ public class CameraFollowObject : MonoBehaviour
     private void Awake()
     {
         playerMovement = playerTransform.GetComponent<PlayerMovement>();
-
         isFacingRight = playerMovement.isFacingRight;
+        transform.position = playerMovement.transform.position;
     }
 
     private void Update()
@@ -22,16 +22,17 @@ public class CameraFollowObject : MonoBehaviour
         transform.position = playerTransform.position;
     }
 
+    //Tweening camera to face player's right when player turns
     public void CallTurn()
     {
-        print("CallTurn");
         if (gameObject.LeanIsTweening())
         {
             gameObject.LeanCancel();
         }
         LeanTween.rotateY(gameObject, DetermineEndRotation(), rotationTime).setEaseInOutSine();
     }
-
+    
+    //i wonder
     private float DetermineEndRotation()
     {
         if (playerMovement.isFacingRight)

@@ -1,88 +1,136 @@
-using NUnit.Framework;
 using UnityEngine;
-using System.Collections.Generic;
-using System.Linq;
+using UnityEditor;
+using UnityEngine.SceneManagement;
 using System.Collections;
-using UnityEngine.UIElements;
+using Unity.Cinemachine;
 
 public class RoomEntrance : MonoBehaviour
 {
-    public GameObject nextEntrance;
+    public string connectedSceneName;
+    public CinemachineCamera connectedCamera;
+
+    public bool caveStart;
     public GameObject blackScreen;
-    public GameObject cameraFollowPlayerObject;
 
     private BoxCollider2D boxCollider;
 
-    public bool active = true;
+    public bool checkForPlayer = true;
     private float transitionDuration = 0.4f;
-    [SerializeField] private bool playerMovesLeft;
 
-    private void Start()
+    public enum Direction
     {
-        boxCollider = GetComponent<BoxCollider2D>();
-        List<Collider2D> overlaps = new List<Collider2D>();
-        boxCollider.Overlap(overlaps);
-        foreach (Collider2D overlap in overlaps)
-        {
-            if (overlap.gameObject.layer == LayerMask.NameToLayer("Player"))
-            {
-                active = false;
-                break;
-            }
-        }
+        Right, 
+        Left,
+        UpRight,
+        UpLeft,
+        Down
+    };
+    public Direction playerEnterDirection = Direction.Right;
 
-        playerMovesLeft = Mathf.Abs(transform.rotation.eulerAngles.y) == 0 ? true : false;
-        print(Mathf.Abs(transform.rotation.eulerAngles.y));
-    }
-
+    //Setting checkForPlayer to true when player leaves the collision box
     private void OnTriggerExit2D(Collider2D collision)
     {
         if (collision.gameObject.layer == LayerMask.NameToLayer("Player"))
         {
-            active = true;
+            checkForPlayer = true;
         }
     }
 
+    //Exiting room on touch
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.layer == LayerMask.NameToLayer("Player"))
         {
-            if (active)
+            if (checkForPlayer)
             {
                 //Cutscene and teleport
-                StartCoroutine(Cutscene(collision.gameObject));
+                StartCoroutine(ExitRoom(collision.gameObject));
             }
         }
     }
 
-    private IEnumerator Cutscene(GameObject player)
+    private IEnumerator ExitRoom(GameObject player)
     {
         PlayerMovement playerMovement = player.GetComponent<PlayerMovement>();
+        GameData.Instance.previousSceneName = SceneManager.GetActiveScene().name;
 
-        if (playerMovesLeft)
+        //save the flare positions to be reloaded when the player comes back
+        GameData.Instance.SaveFlarePositionsForCurrentScene();
+
+        //Moving player manually based off direction
+        switch (playerEnterDirection)
         {
-            playerMovement.ManualMove(-1);
-        }
-        else
-        {
-            playerMovement.ManualMove(1);
+            case Direction.Left:
+                playerMovement.ManualMove(-1);
+                break;
+
+            case Direction.Right:
+                playerMovement.ManualMove(1);
+                break;
+
+            case Direction.Down:
+                playerMovement.DisableMovement();
+                break;
         }
 
-        blackScreen.transform.position = new Vector2(cameraFollowPlayerObject.transform.position.x, cameraFollowPlayerObject.transform.position.y);
-
-        nextEntrance.GetComponent<RoomEntrance>().active = false;
+        //doing black screen thingy
+        blackScreen.SetActive(true);
+        blackScreen.transform.position = new Vector2(player.transform.position.x, player.transform.position.y);
         blackScreen.LeanAlpha(1, transitionDuration);
 
         yield return new WaitForSeconds(transitionDuration);
 
-        player.transform.position = nextEntrance.transform.position;
+        SceneManager.LoadScene(connectedSceneName);
+    }
 
-        yield return new WaitForSeconds(0.25f);
+    public IEnumerator EnterRoom(GameObject player)
+    {
+        PlayerMovement playerMovement = player.GetComponent<PlayerMovement>();
 
+        CameraManager.instance.SetCurrentCamera(connectedCamera);
+
+        //making sure the black screen is active cuz i disactivate it cuz its super annoying ts pmo
+        blackScreen.SetActive(true);
+        blackScreen.GetComponent<SpriteRenderer>().color = Color.black;
+
+        //spawn all flares that were there
+        GameData.Instance.LoadSavedFlares();
+
+        //Manually moving player
+        switch (playerEnterDirection)
+        {
+            case Direction.Left:
+                playerMovement.ManualMove(1);
+                break;
+
+            case Direction.Right:
+                playerMovement.ManualMove(-1);
+                break;
+
+            case Direction.Down:
+                playerMovement.DisableMovement();
+                playerMovement.SetManualVelocity(new Vector2(-3, 50), 0, true);
+                break;
+        }
+
+        yield return new WaitForSeconds(0.25f); //hides the camera moving to the player
+
+        //black screen thingy
         blackScreen.LeanAlpha(0, transitionDuration);
 
-        yield return new WaitForSeconds(transitionDuration - 0.25f);
+        yield return new WaitForSeconds(transitionDuration);
 
         playerMovement.StopManualMovement();
+
+        if (caveStart)
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    //start coroutine wasn't working :(
+    public void Enter(GameObject player)
+    {
+        StartCoroutine(EnterRoom(player));
     }
 }
