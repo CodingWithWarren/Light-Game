@@ -79,7 +79,7 @@ public class PlayerManager : MonoBehaviour
                 continue;
             }
 
-            if (entrance.connectedScene.name == previousScene)
+            if (entrance.connectedSceneName == previousScene)
             {
                 entrance.checkForPlayer = false;
                 gameObject.transform.position = entrance.gameObject.transform.position;

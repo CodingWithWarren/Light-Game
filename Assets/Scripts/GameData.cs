@@ -113,6 +113,16 @@ public class GameData : MonoBehaviour
         }
     }
     #endregion
+
+    #region On Application Quit
+
+    private void OnApplicationQuit()
+    {
+        SaveFlarePositionsForCurrentScene();
+        SaveSystem.Save();
+    }
+
+    #endregion
 }
 
 #region Custom Classes for Saving and Loading

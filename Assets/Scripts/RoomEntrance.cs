@@ -6,7 +6,7 @@ using Unity.Cinemachine;
 
 public class RoomEntrance : MonoBehaviour
 {
-    public SceneAsset connectedScene;
+    public string connectedSceneName;
     public CinemachineCamera connectedCamera;
 
     public bool caveStart;
@@ -80,7 +80,7 @@ public class RoomEntrance : MonoBehaviour
 
         yield return new WaitForSeconds(transitionDuration);
 
-        SceneManager.LoadScene(connectedScene.name);
+        SceneManager.LoadScene(connectedSceneName);
     }
 
     public IEnumerator EnterRoom(GameObject player)

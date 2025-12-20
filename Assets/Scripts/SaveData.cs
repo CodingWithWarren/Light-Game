@@ -36,6 +36,13 @@ public class SaveSystem
         HandleLoadData();
     }
 
+    public static PlayerSaveData LoadForMenu()
+    {
+        string saveContents = File.ReadAllText(SaveFileName());
+        _saveData = JsonUtility.FromJson<SaveData>(saveContents);
+        return _saveData.PlayerData;
+    }
+
     private static void HandleSaveData()
     {
         GameObject.Find("Player").GetComponent<PlayerManager>().Save(ref _saveData.PlayerData);
@@ -47,4 +54,4 @@ public class SaveSystem
         GameData.Instance.Load(_saveData.EnvironmentData);
         GameObject.Find("Player").GetComponent<PlayerManager>().Load(_saveData.PlayerData);
     }
-} 
+}

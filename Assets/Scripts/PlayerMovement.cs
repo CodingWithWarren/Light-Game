@@ -1,5 +1,5 @@
 using System;
-using UnityEditorInternal;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.InputSystem;
@@ -45,6 +45,7 @@ public class PlayerMovement : MonoBehaviour
     public float coyoteTimeSeconds = 0.1f;
     public float gravityMultipler = 1f;
     public float terminalVelocity = -15f;
+    [SerializeField] bool hardFalling = false;
     [SerializeField] float airTime = 0f;
 
     [Header("Wall Actions")]
@@ -62,6 +63,12 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private GameObject cameraFollowGO;
     private CameraFollowObject cameraFollowObject;
     private float fallSpeedYDampingChangeThreshold;
+
+    [Header("Particles")]
+    private ParticleSystem wallClingParticle;
+    private ParticleSystem hardLandParticle;
+
+    private bool playingHardLandParticle = false;
 
     [Header("")]
 
@@ -81,6 +88,9 @@ public class PlayerMovement : MonoBehaviour
         moveAction = inputActionAsset.FindActionMap("Player").FindAction("Move");
 
         cameraFollowObject = cameraFollowGO.GetComponent<CameraFollowObject>();
+
+        wallClingParticle = transform.Find("Wall Cling Particle").GetComponent<ParticleSystem>();
+        hardLandParticle = transform.Find("Hard Land Particle").GetComponent<ParticleSystem>();
     }
 
     private void Start()
@@ -90,9 +100,11 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-
         //Checking whether or not player is grounded
         bool groundedHit = rb.CircleCast(Vector2.down, groundCastDistance);
+
+        //setting hardFalling
+        hardFalling = velocity.y == terminalVelocity;
 
         SetRotation();
         CheckForWallTouch();
@@ -143,6 +155,12 @@ public class PlayerMovement : MonoBehaviour
 
             LerpSpeedMultiplier(groundedSpeedMultiplier, speedChangeRate);
             animator.SetBool("Moving", velocity.x != 0);
+
+            if (hardFalling && !playingHardLandParticle)
+            {
+                StartCoroutine(PlayHardLandParticle());
+                hardFalling = false;
+            }
         }
         else if (state == PlayerStates.WallClinging)
         {
@@ -338,28 +356,6 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    public void WallClingInput(InputAction.CallbackContext context)
-    {
-        if (context.performed && state == PlayerStates.InAir && !disableMovement)
-        {
-            if (rb.CircleCast(Vector2.right, rightCastDistance) && !rb.CircleCastObject(Vector2.right, rightCastDistance).CompareTag("Cannot Wall Cling"))
-            {
-                WallCling(true);
-            }
-            else if (rb.CircleCast(Vector2.left, leftCastDistance) && !rb.CircleCastObject(Vector2.left, leftCastDistance).CompareTag("Cannot Wall Cling"))
-            {
-                WallCling(false);
-            }
-        }
-    }
-
-    private void WallCling(bool facingRight)
-    {
-        state = PlayerStates.WallClinging;
-        transform.rotation = Quaternion.Euler(0, facingRight ? 0 : 180, 0);
-        animator.SetTrigger("Wall Cling");
-    }
-
     private void Gravity()
     {
         bool falling = velocity.y < 0 ? true : false;
@@ -384,6 +380,62 @@ public class PlayerMovement : MonoBehaviour
 
         animator.SetBool("Falling", falling);
     }
+
+    private IEnumerator PlayHardLandParticle()
+    {
+        Vector3 particlePosition = new Vector3(transform.position.x, transform.position.y - 0.45f);
+        GameObject particle = Instantiate(hardLandParticle.gameObject, particlePosition, Quaternion.identity);
+        particle.GetComponent<ParticleSystem>().Play();
+        playingHardLandParticle = true;
+
+        yield return new WaitForSeconds(hardLandParticle.main.duration);
+        playingHardLandParticle = false;
+        Destroy(particle);
+    }
+    #endregion
+
+    #region Wall Clinging
+
+    public void WallClingInput(InputAction.CallbackContext context)
+    {
+        if (context.performed && state == PlayerStates.InAir && !disableMovement)
+        {
+            if (rb.CircleCast(Vector2.right, rightCastDistance) && !rb.CircleCastObject(Vector2.right, rightCastDistance).CompareTag("Cannot Wall Cling"))
+            {
+                WallCling(true);
+            }
+            else if (rb.CircleCast(Vector2.left, leftCastDistance) && !rb.CircleCastObject(Vector2.left, leftCastDistance).CompareTag("Cannot Wall Cling"))
+            {
+                WallCling(false);
+            }
+        }
+    }
+
+    private void WallCling(bool facingRight)
+    {
+        state = PlayerStates.WallClinging;
+        transform.rotation = Quaternion.Euler(0, facingRight ? 0 : 180, 0);
+        animator.SetTrigger("Wall Cling");
+        StartCoroutine(PlayWallClingParticle(facingRight));
+    }
+
+    private IEnumerator PlayWallClingParticle(bool facingRight)
+    {
+        //offsetting the particle's x position based off where the pixaxe will be
+        float particleX = transform.position.x + (facingRight ? 0.3f : -0.3f);
+        Vector3 particlePosition = new Vector3(particleX, transform.position.y, 0);
+
+        GameObject particle = Instantiate(wallClingParticle.gameObject, particlePosition, transform.rotation);
+
+        yield return new WaitForSeconds(0.06f); //duration of the pickaxe swinging animation
+
+        particle.GetComponent<ParticleSystem>().Play();
+
+        yield return new WaitForSeconds(wallClingParticle.main.duration);
+
+        Destroy(particle);
+    }
+
     #endregion
 
     #region Manual Stuff

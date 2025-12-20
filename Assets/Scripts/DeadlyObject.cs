@@ -3,8 +3,9 @@ using UnityEngine;
 
 public class DeadlyObject : MonoBehaviour
 {
-    public Vector2 playerVelocityOnKill = new Vector2(0, 10);
     private bool killActive = true;
+
+    public const float playerForceMagnitude = 10;
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -16,8 +17,11 @@ public class DeadlyObject : MonoBehaviour
 
     private IEnumerator KillPlayer(Collider2D collision)
     {
+        Vector2 direction = (collision.transform.position - transform.position).normalized;
+        direction.y += 0.5f;
+
         killActive = false;
-        yield return StartCoroutine(collision.gameObject.GetComponent<PlayerManager>().Die(playerVelocityOnKill));
+        yield return StartCoroutine(collision.gameObject.GetComponent<PlayerManager>().Die(direction * playerForceMagnitude));
         killActive = true;
     }
 }
